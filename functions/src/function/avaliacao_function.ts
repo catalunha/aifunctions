@@ -58,7 +58,7 @@ async function aplicarAvaliacao(snap: any) {
   //verificar se a condicao aplicado esta true
   if (!dataDepois.aplicar) { return 0; }
 
-  //console.log("Aplicando avaliacao. id: " + id);
+  console.log("Aplicando avaliacao.id: " + id);
 
   let listaQuestoesNovas: any = false;
   if (dataDepois.questaoAplicadaFunction !== null) {
@@ -245,7 +245,7 @@ function gerarSalvarNovoDocumentDeTarefa(aluno: any, questao: any, avaliacaoId: 
     turma: avaliacaoData.turma,
     professor: avaliacaoData.professor,
     problema: questao.data().problema,
-    variavel: simulacao.data().variavel,
+    variavel: simulacao.data().variavel != null ? simulacao.data().variavel : null,
     gabarito: simulacao.data().gabarito,
     aberta: true,
     inicio: avaliacaoData.inicio,

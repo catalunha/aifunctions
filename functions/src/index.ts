@@ -4,7 +4,7 @@ import * as functions from 'firebase-functions';
 // https://firebase.google.com/docs/functions/typescript
 
 // export const helloWorld = functions.https.onRequest((request, response) => {
-//  response.send("Hello from Firebase! AI...");
+//  response.send("Hello from Firebase! AIFunctions ok !...");
 // });
 
 
@@ -23,8 +23,8 @@ import * as functions from 'firebase-functions';
 // exports.turmaOnDelete = functions.firestore.document('Turma/{avaliacaoId}').onDelete(turmaFunction.turmaOnDelete);
 
 // // Avaliacao
-// import * as avaliacaoFunction from './function/avaliacao_function';
-// exports.avaliacaoOnUpdate = functions.firestore.document('Avaliacao/{avaliacaoId}').onUpdate(avaliacaoFunction.avaliacaoOnUpdate);
+import * as avaliacaoFunction from './function/avaliacao_function';
+exports.avaliacaoOnUpdate = functions.firestore.document('Avaliacao/{avaliacaoId}').onUpdate(avaliacaoFunction.avaliacaoOnUpdate);
 // exports.avaliacaoOnDelete = functions.firestore.document('Avaliacao/{avaliacaoId}').onDelete(avaliacaoFunction.avaliacaoOnDelete);
 
 // // Questao
