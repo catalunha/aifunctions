@@ -62,22 +62,23 @@ async function aplicarAvaliacao(snap: any) {
 
   let listaQuestoesNovas: any = false;
   if (dataDepois.questaoAplicadaFunction !== null) {
-    listaQuestoesNovas = dataDepois.questaoAplicada.filter((item: any) => dataDepois.questaoAplicadaFunction.indexOf(item) < 0);
+    listaQuestoesNovas = await dataDepois.questaoAplicada.filter((item: any) => dataDepois.questaoAplicadaFunction.indexOf(item) < 0);
   }
-
+  console.log('listaQuestoesNovas' + listaQuestoesNovas.length)
   let listaAlunosNovos: any = false;
   if (dataDepois.aplicadaPAlunoFunction !== null) {
-    listaAlunosNovos = dataDepois.aplicadaPAluno.filter((item: any) => dataDepois.aplicadaPAlunoFunction.indexOf(item) < 0)
+    listaAlunosNovos = await dataDepois.aplicadaPAluno.filter((item: any) => dataDepois.aplicadaPAlunoFunction.indexOf(item) < 0)
   }
+  console.log('listaAlunosNovos' + listaAlunosNovos.length)
 
   if (
     (dataDepois.questaoAplicadaFunction === null || dataDepois.questaoAplicadaFunction.length == 0) &&
     (dataDepois.aplicadaPAlunoFunction === null || dataDepois.aplicadaPAlunoFunction.length == 0)
   ) {
     // CASO 01 - todas os questoes para todos os alunos ( todos os aluno para todas as questoes )
-    //console.log("Aplicando avaliacao. CASO 01")
-    marcadorAtualizacao.atualizarListaAlunos = true;
+    console.log("Aplicando avaliacao. CASO 01. Todas as Questoes x Todos os Alunos")
     marcadorAtualizacao.atualizarListaQuestoes = true;
+    marcadorAtualizacao.atualizarListaAlunos = true;
     //console.log("Aplicando avaliacao. CASO 01. dataDepois.questaoAplicada = " + dataDepois.questaoAplicada);
     //console.log("Aplicando avaliacao. CASO 01. dataDepois.aplicadaPAluno = " + dataDepois.aplicadaPAluno);
     //console.log("Aplicando avaliacao. CASO 01. dataDepois.questaoAplicadaFunction = " + dataDepois.questaoAplicadaFunction);
@@ -101,7 +102,7 @@ async function aplicarAvaliacao(snap: any) {
     //console.log("Aplicando avaliacao. CASO 02. listaAlunosNovos = " + listaAlunosNovos);
     //console.log("Aplicando avaliacao. CASO 02. marcadorAtualizacao.atualizarListaAlunos = " + marcadorAtualizacao.atualizarListaAlunos);
     //console.log("Aplicando avaliacao. CASO 02. marcadorAtualizacao.atualizarListaQuestoes = " + marcadorAtualizacao.atualizarListaQuestoes);
-    return iniciarProcessoAplicarAvaliacao(listaQuestoesNovas, dataDepois.aplicadaPAluno, id, dataDepois, marcadorAtualizacao);
+    return await iniciarProcessoAplicarAvaliacao(listaQuestoesNovas, dataDepois.aplicadaPAluno, id, dataDepois, marcadorAtualizacao);
 
   } else if ((dataDepois.questaoAplicadaFunction === null || listaQuestoesNovas.length == 0) && (listaAlunosNovos && listaAlunosNovos.length > 0)) {
     // CASO 03 - Alunos novos para todas as questoes
@@ -168,17 +169,29 @@ async function iniciarProcessoAplicarAvaliacao(listaQuestoes: any, listaAlunos: 
     //pegar a lista de documents de alunos
     await getListaDocuments(listaAlunos, 'Usuario').then(async (listaAlunosFiltrada) => {
       //aplicar questao para cada aluno
-      await aplicarListaQuestoesEmListaAlunos(listaAlunosFiltrada, listaQuestoesFiltrada, avaliacaoId, avaliacaoData, marcadorAtualizacao).then((msg) => {
+      await aplicarListaQuestoesEmListaAlunos(listaAlunosFiltrada, listaQuestoesFiltrada, avaliacaoId, avaliacaoData, marcadorAtualizacao).then(async (msg) => {
         //console.log(msg);
-
         //Atualizar lista aplicadaPAlunoFunction, questaoAplicadaFunction
-        if (marcadorAtualizacao.atualizarListaQuestoes) { atualizarListaQuestoesAplicados(avaliacaoData.questaoAplicada, avaliacaoId) }
-        if (marcadorAtualizacao.atualizarListaAlunos) { atualizarListaUsuariosAplicados(avaliacaoData.aplicadaPAluno, avaliacaoId) }
+        if (marcadorAtualizacao.atualizarListaQuestoes) { await atualizarListaQuestoesAplicados(avaliacaoData.questaoAplicada, avaliacaoId) }
+        if (marcadorAtualizacao.atualizarListaAlunos) { await atualizarListaUsuariosAplicados(avaliacaoData.aplicadaPAluno, avaliacaoId) }
+
+      }).catch((error) => {
+        console.log("Error: aplicarListaQuestoesEmListaAlunos(...")
+        console.log(error)
+        return 0
 
       });
       //TODOCriar function que passando lista de alunos e lista de questionario adicione-os a lista de aplicados
-    }).catch(err => { return 0 })
-  }).catch(err => { return 0 })
+    }).catch(error => {
+      console.log("Error: getListaDocuments(listaAlunos, 'Usuario')...")
+      console.log(error)
+      return 0
+    })
+  }).catch(error => {
+    console.log("Error: getListaDocuments(listaQuestoes, 'Questao')...")
+    console.log(error)
+    return 0
+  })
 
 }
 
@@ -196,9 +209,14 @@ function aplicarListaQuestoesEmListaAlunos(listaAlunos: any, listaQuestoes: any,
       await DatabaseReferences.Simulacao.where('problema.id', '==', quetaoData.problema.id).get().then(async (listaSimulacao) => {
         // console.log("Quantidade situacoes >> " + listaSimulacao.docs.length)
         // para cada questao aplicar para lista de alunos
-        await aplicarTarefaParaCadaAluno(listaAlunos, questao, avaliacaoId, avaliacaoData, listaSimulacao.docs, marcadorAtualizacao).then(() => {
+        await aplicarTarefaParaCadaAluno(listaAlunos, questao, avaliacaoId, avaliacaoData, listaSimulacao.docs, marcadorAtualizacao).then(async () => {
           // Atualizar campo aplicar, aplicado na avaliacao
-          atualizarAplicarAplicada(avaliacaoId);
+          await atualizarAplicarAplicada(avaliacaoId);
+        }).catch((error) => {
+          console.log("Error: aplicarTarefaParaCadaAluno(...")
+          console.log(error)
+          reject("Reject: aplicarListaQuestoesEmListaAlunos(...")
+          return 0
         });
       })
       if ((index + 1) >= array.length) {
@@ -210,11 +228,16 @@ function aplicarListaQuestoesEmListaAlunos(listaAlunos: any, listaQuestoes: any,
 
 function aplicarTarefaParaCadaAluno(listaAlunos: any, questao: any, avaliacaoId: any, avaliacaoData: any, simulacaoLista: any, marcadorAtualizacao: any) {
   return new Promise((resolve, reject) => {
-    listaAlunos.forEach((aluno: any, index: any, array: any) => {
+    listaAlunos.forEach(async (aluno: any, index: any, array: any) => {
       // console.log("simulacaoLista.length:"+simulacaoLista.length)//+" simulacaoLista : " + simulacaoLista)
       let simulacaoNumero = getNumeroAleatorio(0, simulacaoLista.length - 1);
       // console.log("ProblemaNum : " + simulacaoNumero)// + " Lista: " + simulacaoLista[simulacaoNumero])
-      gerarSalvarNovoDocumentDeTarefa(aluno, questao, avaliacaoId, avaliacaoData, simulacaoLista[simulacaoNumero], marcadorAtualizacao)
+      await gerarSalvarNovoDocumentDeTarefa(aluno, questao, avaliacaoId, avaliacaoData, simulacaoLista[simulacaoNumero], marcadorAtualizacao)
+        .catch((error) => {
+          console.log("Error: gerarSalvarNovoDocumentDeTarefa(...")
+          console.log(error)
+          return 0
+        })
       if ((index + 1) >= array.length) {
         resolve("Fim de percorrer lista de alunos");
       }
@@ -223,7 +246,7 @@ function aplicarTarefaParaCadaAluno(listaAlunos: any, questao: any, avaliacaoId:
 
 }
 
-function gerarSalvarNovoDocumentDeTarefa(aluno: any, questao: any, avaliacaoId: any, avaliacaoData: any, simulacao: any, marcadorAtualizacao: any) {
+async function gerarSalvarNovoDocumentDeTarefa(aluno: any, questao: any, avaliacaoId: any, avaliacaoData: any, simulacao: any, marcadorAtualizacao: any) {
   let tarefa = {
     aluno: {
       foto: aluno.data().foto.url != null ? aluno.data().foto.url : null,
@@ -257,56 +280,62 @@ function gerarSalvarNovoDocumentDeTarefa(aluno: any, questao: any, avaliacaoId: 
     avaliacaoNota: avaliacaoData.nota,
   }
 
-  DatabaseReferences.Tarefa.doc().set(tarefa).then(() => {
+  await DatabaseReferences.Tarefa.doc().set(tarefa).then(async () => {
     //console.log("Nova tarefa salva >> ")
-    atualizarQuestaoAplicada(questao.id);
-  }).catch((Err) => {
-    //console.log("Erro ao salvar nova tarefa >> " + Err)
+    await atualizarQuestaoAplicada(questao.id)
+      .catch((error) => {
+        console.log("Error: atualizarQuestaoAplicada...")
+        console.log(error)
+        return 0
+      })
+  }).catch((error) => {
+    console.log("Error: DatabaseReferences.Tarefa.doc().set(tarefa)...")
+    console.log(error)
+    return 0
   })
+
 }
 
-function atualizarQuestaoAplicada(questaoID: any) {
-  DatabaseReferences.Questao.doc(questaoID).set({
+async function atualizarQuestaoAplicada(questaoID: any) {
+  await DatabaseReferences.Questao.doc(questaoID).set({
     aplicada: true
-  }, { merge: true }).then(() => {
-    ////console.log("OK 02")
-  }).catch((err) => {
-    //console.log("atualizarQuestaoAplicada. questaoID: " + questaoID + ". Erro " + err)
-  })
+  }, { merge: true })
+    .catch((error) => {
+      console.log("Error: DatabaseReferences.Questao.doc(questaoID)...")
+      console.log(error)
+      return 0
+    })
 }
 
-function atualizarAplicarAplicada(avaliacaoId: any) {
-  DatabaseReferences.Avaliacao.doc(avaliacaoId).set({
+async function atualizarAplicarAplicada(avaliacaoId: any) {
+  await DatabaseReferences.Avaliacao.doc(avaliacaoId).set({
     aplicar: false,
     aplicada: true
-  }, { merge: true }).then(() => {
-    ////console.log("OK 02")
-  }).catch((err) => {
-    //console.log("atualizarAplicarAplicada. avaliacaoId: " + avaliacaoId + ". Erro " + err)
-  })
+  }, { merge: true })
+    .catch((error) => {
+      console.log("atualizarAplicarAplicada. avaliacaoId: " + avaliacaoId + ". Erro " + error)
+    })
 }
 
 
 
-function atualizarListaUsuariosAplicados(listaUsuarios: any, avaliacaoId: any) {
-  DatabaseReferences.Avaliacao.doc(avaliacaoId).set({
+async function atualizarListaUsuariosAplicados(listaUsuarios: any, avaliacaoId: any) {
+  await DatabaseReferences.Avaliacao.doc(avaliacaoId).set({
     aplicadaPAlunoFunction: listaUsuarios
-  }, { merge: true }).then(() => {
-    //console.log("Avaliacao: " + avaliacaoId + " Lista de usuarios atualizada")
-  }).catch((err) => {
-    //console.log("Err 02 " + err)
-  })
+  }, { merge: true })
+    .catch((error) => {
+      console.log("Error: Avaliacao: " + avaliacaoId + " Lista de usuarios atualizada" + error)
+    })
 }
 
 
-function atualizarListaQuestoesAplicados(listaQuestoes: any, avaliacaoId: any) {
-  DatabaseReferences.Avaliacao.doc(avaliacaoId).set({
+async function atualizarListaQuestoesAplicados(listaQuestoes: any, avaliacaoId: any) {
+  await DatabaseReferences.Avaliacao.doc(avaliacaoId).set({
     questaoAplicadaFunction: listaQuestoes
-  }, { merge: true }).then(() => {
-    //console.log("Avaliacao: " + avaliacaoId + " Lista de questoes atualizada")
-  }).catch((err) => {
-    //console.log("Err 02 " + err)
-  })
+  }, { merge: true })
+    .catch((error) => {
+      console.log("Error: Avaliacao: " + avaliacaoId + " Lista de questoes atualizada")
+    })
 
 }
 
@@ -321,9 +350,9 @@ function getListaDocuments(listaIdsDocumentos: any, collection: any) {
     listaIdsDocumentos.forEach(async (idDoc: any, index: any, array: any) => {
       await DatabaseReferences.db.collection(collection).doc(idDoc).get().then((document) => {
         listaResultado.push(document);
-      }).catch((err) => {
-        //console.log("getListaDocuments. Erro. Col.: " + collection + " Id: " + idDoc);
-        reject("");
+      }).catch((error) => {
+        console.log("Error: getListaDocuments. Erro. Col.: " + collection + " Id: " + idDoc);
+        reject("reject: getListaDocuments. Erro. Col.: " + collection + " Id: " + idDoc);
       })
       if ((index) + 1 >= array.length) {
         resolve(listaResultado);
