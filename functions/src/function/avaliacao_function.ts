@@ -206,12 +206,12 @@ function aplicarListaQuestoesEmListaAlunos(listaAlunos: any, listaQuestoes: any,
   return new Promise((resolve, reject) => {
     listaQuestoes.forEach(async (questao: any, index: any, array: any) => {
       let quetaoData = questao.data()
-      await DatabaseReferences.Simulacao.where('problema.id', '==', quetaoData.problema.id).get().then(async (listaSimulacao) => {
+      await DatabaseReferences.Simulacao.where('problema.id', '==', quetaoData.problema.id).get().then( (listaSimulacao) => {
         // console.log("Quantidade situacoes >> " + listaSimulacao.docs.length)
         // para cada questao aplicar para lista de alunos
-        await aplicarTarefaParaCadaAluno(listaAlunos, questao, avaliacaoId, avaliacaoData, listaSimulacao.docs, marcadorAtualizacao).then(async () => {
+        aplicarTarefaParaCadaAluno(listaAlunos, questao, avaliacaoId, avaliacaoData, listaSimulacao.docs, marcadorAtualizacao).then(async () => {
           // Atualizar campo aplicar, aplicado na avaliacao
-          await atualizarAplicarAplicada(avaliacaoId);
+          atualizarAplicarAplicada(avaliacaoId);
         }).catch((error) => {
           console.log("Error: aplicarTarefaParaCadaAluno(...")
           console.log(error)
@@ -279,15 +279,18 @@ async function gerarSalvarNovoDocumentDeTarefa(aluno: any, questao: any, avaliac
     questaoNota: questao.data().nota,
     avaliacaoNota: avaliacaoData.nota,
   }
-
-  await DatabaseReferences.Tarefa.doc().set(tarefa).then(async () => {
+  console.log(tarefa)
+  DatabaseReferences.Tarefa.doc().set(tarefa).then(async () => {
     //console.log("Nova tarefa salva >> ")
-    await atualizarQuestaoAplicada(questao.id)
-      .catch((error) => {
-        console.log("Error: atualizarQuestaoAplicada...")
-        console.log(error)
-        return 0
-      })
+    // await atualizarQuestaoAplicada(questao.id)
+    //   .catch((error) => {
+    //     console.log("Error: atualizarQuestaoAplicada...")
+    //     console.log(error)
+    //     return 0
+    //   })
+    DatabaseReferences.Questao.doc(questao.id).set({
+          aplicada: true
+        }, { merge: true })
   }).catch((error) => {
     console.log("Error: DatabaseReferences.Tarefa.doc().set(tarefa)...")
     console.log(error)
@@ -295,17 +298,16 @@ async function gerarSalvarNovoDocumentDeTarefa(aluno: any, questao: any, avaliac
   })
 
 }
-
-async function atualizarQuestaoAplicada(questaoID: any) {
-  await DatabaseReferences.Questao.doc(questaoID).set({
-    aplicada: true
-  }, { merge: true })
-    .catch((error) => {
-      console.log("Error: DatabaseReferences.Questao.doc(questaoID)...")
-      console.log(error)
-      return 0
-    })
-}
+// async function atualizarQuestaoAplicada(questaoID: any) {
+//   await DatabaseReferences.Questao.doc(questaoID).set({
+//     aplicada: true
+//   }, { merge: true })
+//     .catch((error) => {
+//       console.log("Error: DatabaseReferences.Questao.doc(questaoID)...")
+//       console.log(error)
+//       return 0
+//     })
+// }
 
 async function atualizarAplicarAplicada(avaliacaoId: any) {
   await DatabaseReferences.Avaliacao.doc(avaliacaoId).set({
