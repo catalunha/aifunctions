@@ -43,186 +43,93 @@ export function exameOnDelete(docSnapShot: any) {
 
 
 
-async function ExameApply(snap: any) {
+async function ExameApply(exameSnapShot: any) {
+  console.log("ExameApply: ");
 
-  // Marcador para referenciar se a lista de alunos aplicados ou questoes aplicadas vai ser atualizada
-  let marcadorAtualizacao = {
-    atualizarListaQuestoes: false,
-    atualizarListaAlunos: false
-  }
-
-  let dataAntes = snap.before.data();
-  let dataDepois = snap.after.data();
-  let id = snap.after.id;
-
+  // let exameDataAntes = exameSnapShot.before.data();
+  let exameData = exameSnapShot.after.data();
+  let exameId = exameSnapShot.after.id;
+  //+++ apagar
   //verificar se a condicao isDelivered esta true
-  if (!dataDepois.isDelivered) { return 0; }
+  if (!exameData.isDelivery) { return 0; }
+  console.log("Process exameRef.id: " + exameId);
 
-  console.log("Aplicando exameRef.id: " + id);
+  let questionListApply: Array<string> = [];
+  let questionListNew: Array<string> = [];
 
-  let listaQuestoesNovas: any = false;
-  if (dataDepois.questaoAplicadaFunction !== null) {
-    listaQuestoesNovas = dataDepois.questaoAplicada.filter((item: any) => dataDepois.questaoAplicadaFunction.indexOf(item) < 0);
-  }
-
-  let listaAlunosNovos: any = false;
-  if (dataDepois.aplicadaPAlunoFunction !== null) {
-    listaAlunosNovos = dataDepois.aplicadaPAluno.filter((item: any) => dataDepois.aplicadaPAlunoFunction.indexOf(item) < 0)
-  }
-
-  let questionApply:Array<string>=[];
-  let questionNew:Array<string>=[];
-  for(const question of dataDepois.questionMap.entries()){
-      console.log(`${question[0]} | ${question[1]} `);
-      if(question[1]){
-          questionApply.push(question[0]);
-          
-      }else{
-          questionNew.push(question[0]);
-  
-      }
-  }
-  let studentApply:Array<string>=[];
-  let studentNew:Array<string>=[];
-  for(const student of dataDepois.studentMap.entries()){
-      console.log(`${student[0]} | ${student[1]} `);
-      if(student[1]){
-          studentApply.push(student[0]);
-          
-      }else{
-          studentNew.push(student[0]);
-  
-      }
-  }
-  if(questionApply.length==0&&questionNew.length>0&&studentApply.length==0&&studentNew.length>0){
-    console.log('caso1');
-    return iniciarProcessoAplicarAvaliacao(dataDepois.questaoAplicada, dataDepois.aplicadaPAluno, id, dataDepois, marcadorAtualizacao);
-
-}
-if(questionApply.length>0&&questionNew.length>0&&studentApply.length>0&&studentNew.length==0){
-    console.log('caso2');
-}
-if(questionApply.length>0&&questionNew.length==0&&studentApply.length>0&&studentNew.length>0){
-    console.log('caso3');
-}
-if(questionApply.length>0&&questionNew.length>0&&studentApply.length>0&&studentNew.length>0){
-    console.log('caso4');
-}
-
-
-  if (
-    (dataDepois.questaoAplicadaFunction === null || dataDepois.questaoAplicadaFunction.length == 0) &&
-    (dataDepois.aplicadaPAlunoFunction === null || dataDepois.aplicadaPAlunoFunction.length == 0)
-  ) {
-    // questaoApplyTrue=[]   studentApplyTrue=[]
-    // questaoNewFalse=[a,b]   studentNewFalse=[1,2]
-    // CASO 01 - todas os questoes para todos os alunos ( todos os aluno para todas as questoes )
-    //console.log("Aplicando avaliacao. CASO 01")
-    marcadorAtualizacao.atualizarListaAlunos = true;
-    marcadorAtualizacao.atualizarListaQuestoes = true;
-    //console.log("Aplicando avaliacao. CASO 01. dataDepois.questaoAplicada = " + dataDepois.questaoAplicada);
-    //console.log("Aplicando avaliacao. CASO 01. dataDepois.aplicadaPAluno = " + dataDepois.aplicadaPAluno);
-    //console.log("Aplicando avaliacao. CASO 01. dataDepois.questaoAplicadaFunction = " + dataDepois.questaoAplicadaFunction);
-    //console.log("Aplicando avaliacao. CASO 01. dataDepois.aplicadaPAlunoFunction = " + dataDepois.aplicadaPAlunoFunction);
-    //console.log("Aplicando avaliacao. CASO 01. marcadorAtualizacao.atualizarListaAlunos = " + marcadorAtualizacao.atualizarListaAlunos);
-    //console.log("Aplicando avaliacao. CASO 01. marcadorAtualizacao.atualizarListaQuestoes = " + marcadorAtualizacao.atualizarListaQuestoes);
-    return iniciarProcessoAplicarAvaliacao(dataDepois.questaoAplicada, dataDepois.aplicadaPAluno, id, dataDepois, marcadorAtualizacao);
-
-  } else if (
-    (listaQuestoesNovas && listaQuestoesNovas.length > 0) &&
-    (dataDepois.aplicadaPAlunoFunction === null || listaAlunosNovos.length == 0)
-  ) {
-    // questaoAppTrue=[a,b]   studentAppTrue=[1,2]
-    // questaoNewFalse=[c,d]   studentNewFalse=[]
-    // CASO 02 - Questoes novas para todos os alunos
-    //console.log("Aplicando avaliacao. CASO 02")
-    marcadorAtualizacao.atualizarListaQuestoes = true;
-    //console.log("Aplicando avaliacao. CASO 02. dataDepois.questaoAplicada = " + dataDepois.questaoAplicada);
-    //console.log("Aplicando avaliacao. CASO 02. dataDepois.aplicadaPAluno = " + dataDepois.aplicadaPAluno);
-    //console.log("Aplicando avaliacao. CASO 02. dataDepois.questaoAplicadaFunction = " + dataDepois.questaoAplicadaFunction);
-    //console.log("Aplicando avaliacao. CASO 02. dataDepois.aplicadaPAlunoFunction = " + dataDepois.aplicadaPAlunoFunction);
-    //console.log("Aplicando avaliacao. CASO 02. listaQuestoesNovas = " + listaQuestoesNovas);
-    //console.log("Aplicando avaliacao. CASO 02. listaAlunosNovos = " + listaAlunosNovos);
-    //console.log("Aplicando avaliacao. CASO 02. marcadorAtualizacao.atualizarListaAlunos = " + marcadorAtualizacao.atualizarListaAlunos);
-    //console.log("Aplicando avaliacao. CASO 02. marcadorAtualizacao.atualizarListaQuestoes = " + marcadorAtualizacao.atualizarListaQuestoes);
-    return iniciarProcessoAplicarAvaliacao(listaQuestoesNovas, dataDepois.aplicadaPAluno, id, dataDepois, marcadorAtualizacao);
-
-  } else if ((dataDepois.questaoAplicadaFunction === null || listaQuestoesNovas.length == 0) && (listaAlunosNovos && listaAlunosNovos.length > 0)) {
-    // questaoAppTrue=[a,b]   studentAppTrue=[1,2]
-    // questaoNewFalse=[]   studentNewFalse=[3,4]
-    // CASO 03 - Alunos novos para todas as questoes
-    //console.log("Aplicando avaliacao. CASO 03")
-    marcadorAtualizacao.atualizarListaAlunos = true;
-    //console.log("Aplicando avaliacao. CASO 03. dataDepois.questaoAplicada = " + dataDepois.questaoAplicada);
-    //console.log("Aplicando avaliacao. CASO 03. dataDepois.aplicadaPAluno = " + dataDepois.aplicadaPAluno);
-    //console.log("Aplicando avaliacao. CASO 03. dataDepois.questaoAplicadaFunction = " + dataDepois.questaoAplicadaFunction);
-    //console.log("Aplicando avaliacao. CASO 03. dataDepois.aplicadaPAlunoFunction = " + dataDepois.aplicadaPAlunoFunction);
-    //console.log("Aplicando avaliacao. CASO 03. listaQuestoesNovas = " + listaQuestoesNovas);
-    //console.log("Aplicando avaliacao. CASO 03. listaAlunosNovos = " + listaAlunosNovos);
-    //console.log("Aplicando avaliacao. CASO 03. marcadorAtualizacao.atualizarListaAlunos = " + marcadorAtualizacao.atualizarListaAlunos);
-    //console.log("Aplicando avaliacao. CASO 03. marcadorAtualizacao.atualizarListaQuestoes = " + marcadorAtualizacao.atualizarListaQuestoes);
-    return iniciarProcessoAplicarAvaliacao(dataDepois.questaoAplicada, listaAlunosNovos, id, dataDepois, marcadorAtualizacao);
-
-  } else if ((listaQuestoesNovas && listaQuestoesNovas.length > 0) && (listaAlunosNovos && listaAlunosNovos.length > 0)) {
-    // questaoAppTrue=[a,b]   studentAppTrue=[1,2]
-    // questaoNewFalse=[c,d]   studentNewFalse=[3,4]
-    // CASO 04 - novos alunos para questoes, e novas questoes para alunos.
-    //console.log("Aplicando avaliacao. CASO 04")
-    //console.log("Aplicando avaliacao. CASO 04. dataDepois.questaoAplicada = " + dataDepois.questaoAplicada);
-    //console.log("Aplicando avaliacao. CASO 04. dataDepois.aplicadaPAluno = " + dataDepois.aplicadaPAluno);
-    //console.log("Aplicando avaliacao. CASO 04. dataDepois.questaoAplicadaFunction = " + dataDepois.questaoAplicadaFunction);
-    //console.log("Aplicando avaliacao. CASO 04. dataDepois.aplicadaPAlunoFunction = " + dataDepois.aplicadaPAlunoFunction);
-    //console.log("Aplicando avaliacao. CASO 04. listaQuestoesNovas = " + listaQuestoesNovas);
-    //console.log("Aplicando avaliacao. CASO 04. listaAlunosNovos = " + listaAlunosNovos);
-    //console.log("Aplicando avaliacao. CASO 04. marcadorAtualizacao.atualizarListaAlunos = " + marcadorAtualizacao.atualizarListaAlunos);
-    //console.log("Aplicando avaliacao. CASO 04. marcadorAtualizacao.atualizarListaQuestoes = " + marcadorAtualizacao.atualizarListaQuestoes);
-
-    let marcadorAtualizacao1 = {
-      atualizarListaQuestoes: true,
-      atualizarListaAlunos: false
+  for (var [key, value] of Object.entries(exameData.questionMap)) {
+    if (value) {
+      questionListApply.push(key);
+    } else {
+      questionListNew.push(key);
     }
-    iniciarProcessoAplicarAvaliacao(listaQuestoesNovas, dataAntes.aplicadaPAluno, id, dataDepois, marcadorAtualizacao1);
+  }
 
-    let marcadorAtualizacao2 = {
-      atualizarListaQuestoes: false,
-      atualizarListaAlunos: true
+  let studentListApply: Array<string> = [];
+  let studentListNew: Array<string> = [];
+  for (var [key, value] of Object.entries(exameData.studentMap)) {
+    if (value) {
+      studentListApply.push(key);
+    } else {
+      studentListNew.push(key);
     }
-    iniciarProcessoAplicarAvaliacao(dataAntes.questaoAplicadaFunction, listaAlunosNovos, id, dataDepois, marcadorAtualizacao2);
+  }
+  if (questionListApply.length == 0 && questionListNew.length > 0 && studentListApply.length == 0 && studentListNew.length > 0) {
+    // CASO 01 - Todas as questoes para todos os alunos ( não há questoes ou alunos aplicados )
+    // questaoApplyTrue=[]   studentListApplyTrue=[]
+    // questaoNewFalse=[a,b]   studentListNewFalse=[1,2]
+    console.log("Process exame. CASO 01")
+    return iniciarProcessoAplicarAvaliacao(questionListNew, studentListNew, exameId, exameData);
+  } else if (questionListApply.length > 0 && questionListNew.length > 0 && studentListApply.length > 0 && studentListNew.length == 0) {
+    // CASO 02 - Questoes novas para todos os alunos ja aplicados (não há alunos novos )
+    // questaoAppTrue=[a,b]   studentAppTrue=[1,2]
+    // questaoNewFalse=[c,d]   studentListNewFalse=[]
+    console.log("Process exame. CASO 02")
+    return iniciarProcessoAplicarAvaliacao(questionListNew, studentListApply, exameId, exameData);
+  } else if (questionListApply.length > 0 && questionListNew.length == 0 && studentListApply.length > 0 && studentListNew.length > 0) {
+    // CASO 03 - Alunos novos para todas as questoes ja aplicadas (nao há questoes novas)
+    // questaoAppTrue=[a,b]   studentAppTrue=[1,2]
+    // questaoNewFalse=[]   studentListNewFalse=[3,4]
+    console.log("Process exame. CASO 03")
+    return iniciarProcessoAplicarAvaliacao(questionListApply, studentListNew, exameId, exameData);
+  } else if (questionListApply.length > 0 && questionListNew.length > 0 && studentListApply.length > 0 && studentListNew.length > 0) {
+    // CASO 04 - Novos questoes para novos alunos ( com questoes e alunos ja aplicados)
+    // questaoAppTrue=[a,b]   studentAppTrue=[1,2]
+    // questaoNewFalse=[c,d]   studentListNewFalse=[3,4]
+    console.log("Process exame. CASO 04")
+    console.log("Process exame. CASO 04a - (questaoNewFalse->studentAppTrue)")
+    iniciarProcessoAplicarAvaliacao(questionListNew, studentListApply, exameId, exameData);
+    console.log("Process exame. CASO 04b - (questaoNewFalse->studentListNewFalse)")
+    iniciarProcessoAplicarAvaliacao(questionListNew, studentListNew, exameId, exameData);
+    // console.log("Aplicando avaliacao. CASO 04c - (questaoAppTrue->studentListNewFalse)")
+    iniciarProcessoAplicarAvaliacao(questionListApply, studentListNew, exameId, exameData);
     return 0;
-
   } else {
-    //console.log("Aplicando avaliacao. Nenhuma condicao foi atingida");
-    atualizarAplicarAplicada(id);
-
+    // console.log("Aplicando avaliacao. Nenhuma condicao foi atingida");
+    atualizarAplicarAplicada(exameId);
     return 0;
-
   }
 }
 
 
 /**
  * Funcao que percorre lista de questoes e aplica cada questao para um aluno
- * @param listaQuestoes 
- * @param listaAlunos 
- * @param avaliacaoId 
- * @param avaliacaoData 
+ * @param questionList 
+ * @param studentList 
+ * @param exameId 
+ * @param exameData 
  * @param marcadorAtualizacao 
  */
-async function iniciarProcessoAplicarAvaliacao(listaQuestoes: any, listaAlunos: any, avaliacaoId: any, avaliacaoData: any, marcadorAtualizacao: any) {
+async function iniciarProcessoAplicarAvaliacao(questionIdList: any, studentIdList: any, exameId: any, exameData: any) {
 
-  //console.log("Aplicando avaliacao. listaQuestoes.length = " + listaQuestoes.length)
+  //console.log("Aplicando avaliacao. questionList.length = " + questionList.length)
   //pegar lista de documents de questoes
-  await getListaDocuments(listaQuestoes, 'Questao').then(async (listaQuestoesFiltrada) => {
+  await getListaDocuments(questionIdList, 'question').then(async (questionDocList) => {
     //pegar a lista de documents de alunos
-    await getListaDocuments(listaAlunos, 'Usuario').then(async (listaAlunosFiltrada) => {
+    await getListaDocuments(studentIdList, 'user').then(async (studentDocList) => {
       //aplicar questao para cada aluno
-      await aplicarListaQuestoesEmListaAlunos(listaAlunosFiltrada, listaQuestoesFiltrada, avaliacaoId, avaliacaoData, marcadorAtualizacao).then((msg) => {
+      await aplicarListaQuestoesEmListaAlunos(questionDocList, studentDocList, exameId, exameData).then((msg) => {
         //console.log(msg);
-
-        //Atualizar lista aplicadaPAlunoFunction, questaoAplicadaFunction
-        if (marcadorAtualizacao.atualizarListaQuestoes) { atualizarListaQuestoesAplicados(avaliacaoData.questaoAplicada, avaliacaoId) }
-        if (marcadorAtualizacao.atualizarListaAlunos) { atualizarListaUsuariosAplicados(avaliacaoData.aplicadaPAluno, avaliacaoId) }
-
       });
       //TODOCriar function que passando lista de alunos e lista de questionario adicione-os a lista de aplicados
     }).catch(err => { return 0 })
@@ -232,21 +139,21 @@ async function iniciarProcessoAplicarAvaliacao(listaQuestoes: any, listaAlunos: 
 
 /**
  * Funcao que recebe lista de anlunos, lista de questao e aplica avaliacao, fazendo as relacoes de alunos com questoes
- * @param listaAlunos 
- * @param listaQuestoes 
- * @param avaliacaoData 
- * @param avaliacaoId 
+ * @param studentList 
+ * @param questionList 
+ * @param exameData 
+ * @param exameId 
  */
-function aplicarListaQuestoesEmListaAlunos(listaAlunos: any, listaQuestoes: any, avaliacaoId: any, avaliacaoData: any, marcadorAtualizacao: any) {
+function aplicarListaQuestoesEmListaAlunos(questionDocList: any, studentDocList: any, exameId: any, exameData: any) {
+  console.log('aplicarListaQuestoesEmListaAlunos::questionDocList.id: ',questionDocList.length);
+  console.log('aplicarListaQuestoesEmListaAlunos::studentDocList.length: ',studentDocList.length);
   return new Promise((resolve, reject) => {
-    listaQuestoes.forEach(async (questao: any, index: any, array: any) => {
-      let quetaoData = questao.data()
-      await DatabaseReferences.Simulacao.where('problema.id', '==', quetaoData.problema.id).get().then(async (listaSimulacao) => {
-        // console.log("Quantidade situacoes >> " + listaSimulacao.docs.length)
-        // para cada questao aplicar para lista de alunos
-        await aplicarTarefaParaCadaAluno(listaAlunos, questao, avaliacaoId, avaliacaoData, listaSimulacao.docs, marcadorAtualizacao).then(() => {
+    questionDocList.forEach(async (questionDoc: any, index: any, array: any) => {
+      await DatabaseReferences.situation.doc(questionDoc.data().situationRef.id).get().then(async (situationDoc) => {
+        console.log('aplicarListaQuestoesEmListaAlunos::questionDoc.id: ',questionDoc.id);
+        await aplicarTarefaParaCadaAluno(questionDoc, studentDocList, exameId, exameData, situationDoc).then(() => {
           // Atualizar campo aplicar, aplicado na avaliacao
-          atualizarAplicarAplicada(avaliacaoId);
+          atualizarAplicarAplicada(exameId);
         });
       })
       if ((index + 1) >= array.length) {
@@ -256,13 +163,14 @@ function aplicarListaQuestoesEmListaAlunos(listaAlunos: any, listaQuestoes: any,
   })
 }
 
-function aplicarTarefaParaCadaAluno(listaAlunos: any, questao: any, avaliacaoId: any, avaliacaoData: any, simulacaoLista: any, marcadorAtualizacao: any) {
+function aplicarTarefaParaCadaAluno(questionDoc: any, studentDocList: any, exameId: any, exameData: any, situationDoc: any) {
+  console.log('aplicarTarefaParaCadaAluno::questionDoc.id: ',questionDoc.id);
+  console.log('aplicarTarefaParaCadaAluno::studentDocList.length: ',studentDocList.length);
+
   return new Promise((resolve, reject) => {
-    listaAlunos.forEach((aluno: any, index: any, array: any) => {
-      // console.log("simulacaoLista.length:"+simulacaoLista.length)//+" simulacaoLista : " + simulacaoLista)
-      let simulacaoNumero = getNumeroAleatorio(0, simulacaoLista.length - 1);
-      // console.log("ProblemaNum : " + simulacaoNumero)// + " Lista: " + simulacaoLista[simulacaoNumero])
-      gerarSalvarNovoDocumentDeTarefa(aluno, questao, avaliacaoId, avaliacaoData, simulacaoLista[simulacaoNumero], marcadorAtualizacao)
+    studentDocList.forEach( (studentDoc: any, index: any, array: any) => {
+      console.log('aplicarTarefaParaCadaAluno::studentDoc.id: ',studentDoc.id);
+      gerarSalvarNovoDocumentDeTarefa(questionDoc, studentDoc, exameId, exameData, situationDoc)
       if ((index + 1) >= array.length) {
         resolve("Fim de percorrer lista de alunos");
       }
@@ -271,51 +179,65 @@ function aplicarTarefaParaCadaAluno(listaAlunos: any, questao: any, avaliacaoId:
 
 }
 
-function gerarSalvarNovoDocumentDeTarefa(aluno: any, questao: any, avaliacaoId: any, avaliacaoData: any, simulacao: any, marcadorAtualizacao: any) {
-  let tarefa = {
-    aluno: {
-      foto: aluno.data().foto.url != null ? aluno.data().foto.url : null,
-      id: aluno.id,
-      nome: aluno.data().nome
-    },
-    avaliacao: {
-      id: avaliacaoId,
-      nome: avaliacaoData.nome
-    },
-    questao: {
-      id: questao.id,
-      numero: questao.data().numero
-    },
-    simulacao: {
-      id: simulacao.id,
-      nome: simulacao.data().nome
-    },
-    turma: avaliacaoData.turma,
-    professor: avaliacaoData.professor,
-    problema: questao.data().problema,
-    variavel: simulacao.data().variavel != null ? simulacao.data().variavel : null,
-    gabarito: simulacao.data().gabarito,
-    aberta: true,
-    inicio: avaliacaoData.inicio,
-    fim: avaliacaoData.fim,
-    tempo: questao.data().tempo,
-    tentativa: questao.data().tentativa,
-    erroRelativo: questao.data().erroRelativo,
-    questaoNota: questao.data().nota,
-    avaliacaoNota: avaliacaoData.nota,
-  }
+function gerarSalvarNovoDocumentDeTarefa(questionDoc: any, studentDoc: any, exameId: any, exameData: any, situationDoc: any) {
+  console.log('>>> gerarSalvarNovoDocumentDeTarefa');
+  console.log('questionDoc.id: ',questionDoc.id);
+  console.log('questionDoc.data().name: ',questionDoc.data().name);
+  console.log('studentDoc.id: ',studentDoc.id);
+  console.log('studentDoc.data().name: ',studentDoc.data().name);
+  console.log('exameId: ',exameId);
+  console.log('exameData.name: ',exameData.name);
+  console.log('situationDoc.id: ',situationDoc.id);
+  console.log('situationDoc.data().name: ',situationDoc.data().name);
+  let simulationIdList = Object.keys(situationDoc.data().simulationModel)
+  let numberRandom = getNumeroAleatorio(0, simulationIdList.length - 1);
+  let input = situationDoc.data().simulationModel[simulationIdList[numberRandom]].input;
+  let output = situationDoc.data().simulationModel[simulationIdList[numberRandom]].output;
+  console.log('input: ',input);
+  console.log('output: ',output);
 
-  DatabaseReferences.Tarefa.doc().set(tarefa).then(() => {
-    //console.log("Nova tarefa salva >> ")
-    atualizarQuestaoAplicada(questao.id);
+  let task = {
+    teacherUserRef: exameData.userRef,
+    classroomRef: questionDoc.data().classroomRef,
+    exameRef: questionDoc.data().exameRef,
+    questionRef: {
+      id: questionDoc.id,
+      name: questionDoc.data().name
+    },
+    situationRef: questionDoc.data().situationRef,
+    studentUserRef: {
+      id: studentDoc.id,
+      name: studentDoc.data().name
+      // foto: studentDoc.data().foto.url != null ? studentDoc.data().foto.url : null,
+    },
+    //dados do exame. mas pode ser alterado pela questao por isto pego da questao
+    start: questionDoc.data().start,
+    end: questionDoc.data().end,
+    scoreExame: exameData.scoreExame,
+    //dados da questao
+    attempt: questionDoc.data().attempt,
+    time: questionDoc.data().time,
+    error: questionDoc.data().error,
+    scoreQuestion: questionDoc.data().scoreQuestion,
+    // gestão da questao
+    attempted: 0,
+    open: true,
+
+    simulationInput: input,
+    simulationOutput: output,
+  }
+  console.log('task: ',task);
+
+  DatabaseReferences.task.doc().set(task).then(() => {
+    atualizarQuestaoAplicada(questionDoc.id);
+    atualizarQuestionStudentApply(exameId, questionDoc.id, studentDoc.id);
   }).catch((Err) => {
-    //console.log("Erro ao salvar nova tarefa >> " + Err)
   })
 }
 
-function atualizarQuestaoAplicada(questaoID: any) {
-  DatabaseReferences.Questao.doc(questaoID).set({
-    aplicada: true
+function atualizarQuestaoAplicada(questionDocId: any) {
+  DatabaseReferences.question.doc(questionDocId).set({
+    isDelivered: true
   }, { merge: true }).then(() => {
     ////console.log("OK 02")
   }).catch((err) => {
@@ -323,40 +245,53 @@ function atualizarQuestaoAplicada(questaoID: any) {
   })
 }
 
-function atualizarAplicarAplicada(avaliacaoId: any) {
-  DatabaseReferences.Avaliacao.doc(avaliacaoId).set({
-    aplicar: false,
-    aplicada: true
+function atualizarAplicarAplicada(exameId: any) {
+  DatabaseReferences.exame.doc(exameId).set({
+    isDelivery: false,
+    isProcess: true
   }, { merge: true }).then(() => {
     ////console.log("OK 02")
   }).catch((err) => {
-    //console.log("atualizarAplicarAplicada. avaliacaoId: " + avaliacaoId + ". Erro " + err)
+    //console.log("atualizarAplicarAplicada. exameId: " + exameId + ". Erro " + err)
   })
 }
 
-
-
-function atualizarListaUsuariosAplicados(listaUsuarios: any, avaliacaoId: any) {
-  DatabaseReferences.Avaliacao.doc(avaliacaoId).set({
-    aplicadaPAlunoFunction: listaUsuarios
-  }, { merge: true }).then(() => {
-    //console.log("Avaliacao: " + avaliacaoId + " Lista de usuarios atualizada")
+function atualizarQuestionStudentApply(exameId: any, questionId: any, studentId: any) {
+  // let field = 'studentMap.',studentId;
+  DatabaseReferences.exame.doc(exameId).update({
+    // field: true
+    // 'studentMap.',studentId: true
+    // `studentMap.${studentId}`: true
+    [`studentMap.${studentId}`]: true,
+    [`questionMap.${questionId}`]: true
+  }).then(() => {
+    //console.log("Avaliacao: " + exameId + " Lista de usuarios atualizada")
   }).catch((err) => {
     //console.log("Err 02 " + err)
   })
 }
 
+// function atualizarListaUsuariosAplicados(listaUsuarios: any, exameId: any) {
+//   DatabaseReferences.Avaliacao.doc(exameId).set({
+//     aplicadaPAlunoFunction: listaUsuarios
+//   }, { merge: true }).then(() => {
+//     //console.log("Avaliacao: " + exameId + " Lista de usuarios atualizada")
+//   }).catch((err) => {
+//     //console.log("Err 02 " + err)
+//   })
+// }
 
-function atualizarListaQuestoesAplicados(listaQuestoes: any, avaliacaoId: any) {
-  DatabaseReferences.Avaliacao.doc(avaliacaoId).set({
-    questaoAplicadaFunction: listaQuestoes
-  }, { merge: true }).then(() => {
-    //console.log("Avaliacao: " + avaliacaoId + " Lista de questoes atualizada")
-  }).catch((err) => {
-    //console.log("Err 02 " + err)
-  })
 
-}
+// function atualizarListaQuestoesAplicados(questionList: any, exameId: any) {
+//   DatabaseReferences.Avaliacao.doc(exameId).set({
+//     questaoAplicadaFunction: questionList
+//   }, { merge: true }).then(() => {
+//     //console.log("Avaliacao: " + exameId + " Lista de questoes atualizada")
+//   }).catch((err) => {
+//     //console.log("Err 02 " + err)
+//   })
+
+// }
 
 /**
  * Funcao que dada um array de id-documentos e uma colection, retorna a lista de documents

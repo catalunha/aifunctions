@@ -16,8 +16,11 @@ export default class DatabaseReferences {
   public static Tarefa = databaseReferences.collection('Tarefa');
   public static Turma = databaseReferences.collection('Turma');
   public static Upload = databaseReferences.collection('Upload');
-  public static foo = databaseReferences.collection('foo');
-  public static bar = databaseReferences.collection('bar');
+
+  public static exame = databaseReferences.collection('exame');
+  public static question = databaseReferences.collection('question');
+  public static situation = databaseReferences.collection('situation');
+  public static task = databaseReferences.collection('task');
 
 
 /**
