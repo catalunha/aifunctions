@@ -4,9 +4,12 @@ import * as functions from 'firebase-functions';
 // https://firebase.google.com/docs/functions/typescript
 
 // export const helloWorld = functions.https.onRequest((request, response) => {
-//  response.send("Hello from Firebase! AIFunctions ok !...");
+//  response.send("Hello from Firebase! AI with asyncRedux...");
 // });
 
+// // // foo
+// import * as fooFunction from './function/foo_function';
+// exports.fooOnCreate = functions.firestore.document('exame/{id}').onCreate(fooFunction.fooOnCreate);
 
 // // Usuario
 // import * as usuarioFunction from './function/usuario_function';
@@ -52,3 +55,9 @@ import * as functions from 'firebase-functions';
 // exports.relatorioOnRequest =  functions.https.onRequest(relatorioFunction.app);
 
 
+// AI com AsyncRedux
+
+// Collection exame
+import * as exameFunction from './function/exame_function';
+exports.exameOnUpdate = functions.firestore.document('exame/{exameId}').onUpdate(exameFunction.exameOnUpdate);
+exports.exameOnDelete = functions.firestore.document('exame/{exameId}').onDelete(exameFunction.exameOnDelete);
