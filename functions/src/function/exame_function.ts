@@ -26,7 +26,7 @@ export function exameOnUpdate(docSnapShot: any) {
     //console.log("Avaliacao.nota alterado. " + docBeforeData.nota + "!=" + docAfterData.nota + " .Atualizando em: Tarefa.");
     DatabaseReferences.updateDocumentWhereEquals('task', 'exameRef.id', docId, { 'scoreExame': docAfterData.scoreExame });
   }
-  if (docBeforeData.isDelivery == false && docAfterData.isDelivery == true) {
+  if (docBeforeData.isDelivered == false && docAfterData.isDelivered == true) {
     console.log("Avaliacao.aplicar false->true. Aplicando avaliação");
     ExameApply(docSnapShot);
   }
@@ -38,6 +38,7 @@ export function exameOnDelete(docSnapShot: any) {
   //console.log("avaliacaoOnDelete. id: " + docId);
   //console.log("avaliacaoOnDelete. Apagando Questao.");
   DatabaseReferences.deleteDocumentGeneric('question', 'exameRef.id', docId);
+  DatabaseReferences.deleteDocumentGeneric('task', 'exameRef.id', docId);
   return 0;
 }
 
@@ -51,7 +52,7 @@ async function ExameApply(exameSnapShot: any) {
   let exameId = exameSnapShot.after.id;
   //+++ apagar
   //verificar se a condicao isDelivered esta true
-  if (!exameData.isDelivery) { return 0; }
+  if (!exameData.isDelivered) { return 0; }
   console.log("Process exameRef.id: " + exameId);
 
   let questionListApply: Array<string> = [];
@@ -221,7 +222,7 @@ function gerarSalvarNovoDocumentDeTarefa(questionDoc: any, studentDoc: any, exam
     scoreQuestion: questionDoc.data().scoreQuestion,
     // gestão da questao
     attempted: 0,
-    open: true,
+    isOpen: true,
 
     simulationInput: input,
     simulationOutput: output,
@@ -247,7 +248,7 @@ function atualizarQuestaoAplicada(questionDocId: any) {
 
 function atualizarAplicarAplicada(exameId: any) {
   DatabaseReferences.exame.doc(exameId).set({
-    isDelivery: false,
+    isDelivered: false,
     isProcess: true
   }, { merge: true }).then(() => {
     ////console.log("OK 02")

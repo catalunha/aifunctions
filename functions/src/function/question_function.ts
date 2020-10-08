@@ -44,7 +44,7 @@ export function questionOnDelete(questionSnapShot: any) {
   //console.log("questionRefOnDelete :: " + questionDocId);
   //console.log("questionRefOnDelete. Apagando task. Atualizando Avaliacao.");
   DatabaseReferences.deleteDocumentGeneric('task', 'questionRef.id', questionDocId);
-  DatabaseReferences.updateDocumentById('task', questionDocData.exameRef.id, { [`questionMap.${questionDocId}`]: admin.firestore.FieldValue.delete() })
+  DatabaseReferences.updateDocumentById('exame', questionDocData.exameRef.id, { [`questionMap.${questionDocId}`]: admin.firestore.FieldValue.delete() })
   return 0;
 }
 
