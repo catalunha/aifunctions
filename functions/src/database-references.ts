@@ -17,6 +17,7 @@ export default class DatabaseReferences {
   public static Turma = databaseReferences.collection('Turma');
   public static Upload = databaseReferences.collection('Upload');
 
+  public static classroom = databaseReferences.collection('classroom');
   public static exame = databaseReferences.collection('exame');
   public static question = databaseReferences.collection('question');
   public static situation = databaseReferences.collection('situation');

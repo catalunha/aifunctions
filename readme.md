@@ -1,0 +1,1 @@
+catalunha@pop-os:~/myapps/aifunctions$ firebase deploy --only functions:classroomOnUpdate,functions:classroomOnDelete

@@ -55,14 +55,26 @@ import * as functions from 'firebase-functions';
 // exports.relatorioOnRequest =  functions.https.onRequest(relatorioFunction.app);
 
 
-// AI com AsyncRedux
+// AI com AsyncRedux e em ingles
 
-// // Collection exame
-import * as exameFunction from './function/exame_function';
-exports.exameOnUpdate = functions.firestore.document('exame/{exameId}').onUpdate(exameFunction.exameOnUpdate);
-exports.exameOnDelete = functions.firestore.document('exame/{exameId}').onDelete(exameFunction.exameOnDelete);
+// // // Collection exame
+// import * as exameFunction from './function/exame_function';
+// exports.exameOnUpdate = functions.firestore.document('exame/{exameId}').onUpdate(exameFunction.exameOnUpdate);
+// exports.exameOnDelete = functions.firestore.document('exame/{exameId}').onDelete(exameFunction.exameOnDelete);
 
-// Questao
-import * as questionFunction from './function/question_function';
-exports.questionOnUpdate = functions.firestore.document('question/{questionId}').onUpdate(questionFunction.questionOnUpdate);
-exports.questionOnDelete = functions.firestore.document('question/{questionId}').onDelete(questionFunction.questionOnDelete);
+// // Collection question
+// import * as questionFunction from './function/question_function';
+// exports.questionOnUpdate = functions.firestore.document('question/{questionId}').onUpdate(questionFunction.questionOnUpdate);
+// exports.questionOnDelete = functions.firestore.document('question/{questionId}').onDelete(questionFunction.questionOnDelete);
+
+// // Collection classroom
+// // firebase deploy --only functions:classroomOnUpdate,functions:classroomOnDelete
+// import * as classroomFunction from './function/classroom_function';
+// exports.classroomOnUpdate = functions.firestore.document('classroom/{classroomId}').onUpdate(classroomFunction.classroomOnUpdate);
+// exports.classroomOnDelete = functions.firestore.document('classroom/{avaliacaoId}').onDelete(classroomFunction.classroomOnDelete);
+
+// Collection user
+// firebase deploy --only functions:userOnUpdate,functions:userOnDelete
+import * as userFunction from './function/user_function';
+exports.userOnUpdate = functions.firestore.document('user/{userId}').onUpdate(userFunction.userOnUpdate);
+exports.userOnDelete = functions.firestore.document('user/{avaliacaoId}').onDelete(userFunction.userOnDelete);
