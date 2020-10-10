@@ -57,22 +57,24 @@ async function ExameApply(exameSnapShot: any) {
 
   let questionListApply: Array<string> = [];
   let questionListNew: Array<string> = [];
-
-  for (var [key, value] of Object.entries(exameData.questionMap)) {
-    if (value) {
-      questionListApply.push(key);
-    } else {
-      questionListNew.push(key);
+  if (exameData.hasOwnProperty('questionMap')) {
+    for (var [key, value] of Object.entries(exameData.questionMap)) {
+      if (value) {
+        questionListApply.push(key);
+      } else {
+        questionListNew.push(key);
+      }
     }
   }
-
   let studentListApply: Array<string> = [];
   let studentListNew: Array<string> = [];
-  for (var [key, value] of Object.entries(exameData.studentMap)) {
-    if (value) {
-      studentListApply.push(key);
-    } else {
-      studentListNew.push(key);
+  if (exameData.hasOwnProperty('studentMap')) {
+    for (var [key, value] of Object.entries(exameData.studentMap)) {
+      if (value) {
+        studentListApply.push(key);
+      } else {
+        studentListNew.push(key);
+      }
     }
   }
   if (questionListApply.length == 0 && questionListNew.length > 0 && studentListApply.length == 0 && studentListNew.length > 0) {
@@ -146,12 +148,12 @@ async function iniciarProcessoAplicarAvaliacao(questionIdList: any, studentIdLis
  * @param exameId 
  */
 function aplicarListaQuestoesEmListaAlunos(questionDocList: any, studentDocList: any, exameId: any, exameData: any) {
-  console.log('aplicarListaQuestoesEmListaAlunos::questionDocList.id: ',questionDocList.length);
-  console.log('aplicarListaQuestoesEmListaAlunos::studentDocList.length: ',studentDocList.length);
+  console.log('aplicarListaQuestoesEmListaAlunos::questionDocList.id: ', questionDocList.length);
+  console.log('aplicarListaQuestoesEmListaAlunos::studentDocList.length: ', studentDocList.length);
   return new Promise((resolve, reject) => {
     questionDocList.forEach(async (questionDoc: any, index: any, array: any) => {
       await DatabaseReferences.situation.doc(questionDoc.data().situationRef.id).get().then(async (situationDoc) => {
-        console.log('aplicarListaQuestoesEmListaAlunos::questionDoc.id: ',questionDoc.id);
+        console.log('aplicarListaQuestoesEmListaAlunos::questionDoc.id: ', questionDoc.id);
         await aplicarTarefaParaCadaAluno(questionDoc, studentDocList, exameId, exameData, situationDoc).then(() => {
           // Atualizar campo aplicar, aplicado na avaliacao
           atualizarAplicarAplicada(exameId);
@@ -165,12 +167,12 @@ function aplicarListaQuestoesEmListaAlunos(questionDocList: any, studentDocList:
 }
 
 function aplicarTarefaParaCadaAluno(questionDoc: any, studentDocList: any, exameId: any, exameData: any, situationDoc: any) {
-  console.log('aplicarTarefaParaCadaAluno::questionDoc.id: ',questionDoc.id);
-  console.log('aplicarTarefaParaCadaAluno::studentDocList.length: ',studentDocList.length);
+  console.log('aplicarTarefaParaCadaAluno::questionDoc.id: ', questionDoc.id);
+  console.log('aplicarTarefaParaCadaAluno::studentDocList.length: ', studentDocList.length);
 
   return new Promise((resolve, reject) => {
-    studentDocList.forEach( (studentDoc: any, index: any, array: any) => {
-      console.log('aplicarTarefaParaCadaAluno::studentDoc.id: ',studentDoc.id);
+    studentDocList.forEach((studentDoc: any, index: any, array: any) => {
+      console.log('aplicarTarefaParaCadaAluno::studentDoc.id: ', studentDoc.id);
       gerarSalvarNovoDocumentDeTarefa(questionDoc, studentDoc, exameId, exameData, situationDoc)
       if ((index + 1) >= array.length) {
         resolve("Fim de percorrer lista de alunos");
@@ -182,20 +184,20 @@ function aplicarTarefaParaCadaAluno(questionDoc: any, studentDocList: any, exame
 
 function gerarSalvarNovoDocumentDeTarefa(questionDoc: any, studentDoc: any, exameId: any, exameData: any, situationDoc: any) {
   console.log('>>> gerarSalvarNovoDocumentDeTarefa');
-  console.log('questionDoc.id: ',questionDoc.id);
-  console.log('questionDoc.data().name: ',questionDoc.data().name);
-  console.log('studentDoc.id: ',studentDoc.id);
-  console.log('studentDoc.data().name: ',studentDoc.data().name);
-  console.log('exameId: ',exameId);
-  console.log('exameData.name: ',exameData.name);
-  console.log('situationDoc.id: ',situationDoc.id);
-  console.log('situationDoc.data().name: ',situationDoc.data().name);
+  console.log('questionDoc.id: ', questionDoc.id);
+  console.log('questionDoc.data().name: ', questionDoc.data().name);
+  console.log('studentDoc.id: ', studentDoc.id);
+  console.log('studentDoc.data().name: ', studentDoc.data().name);
+  console.log('exameId: ', exameId);
+  console.log('exameData.name: ', exameData.name);
+  console.log('situationDoc.id: ', situationDoc.id);
+  console.log('situationDoc.data().name: ', situationDoc.data().name);
   let simulationIdList = Object.keys(situationDoc.data().simulationModel)
   let numberRandom = getNumeroAleatorio(0, simulationIdList.length - 1);
   let input = situationDoc.data().simulationModel[simulationIdList[numberRandom]].input;
   let output = situationDoc.data().simulationModel[simulationIdList[numberRandom]].output;
-  console.log('input: ',input);
-  console.log('output: ',output);
+  console.log('input: ', input);
+  console.log('output: ', output);
 
   let task = {
     teacherUserRef: exameData.userRef,
@@ -227,7 +229,7 @@ function gerarSalvarNovoDocumentDeTarefa(questionDoc: any, studentDoc: any, exam
     simulationInput: input,
     simulationOutput: output,
   }
-  console.log('task: ',task);
+  console.log('task: ', task);
 
   DatabaseReferences.task.doc().set(task).then(() => {
     atualizarQuestaoAplicada(questionDoc.id);
