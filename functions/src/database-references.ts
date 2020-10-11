@@ -22,6 +22,7 @@ export default class DatabaseReferences {
   public static exame = databaseReferences.collection('exame');
   public static question = databaseReferences.collection('question');
   public static situation = databaseReferences.collection('situation');
+  public static know = databaseReferences.collection('know');
   public static task = databaseReferences.collection('task');
 
 

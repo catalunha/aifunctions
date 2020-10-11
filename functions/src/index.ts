@@ -67,14 +67,21 @@ import * as functions from 'firebase-functions';
 // exports.questionOnUpdate = functions.firestore.document('question/{questionId}').onUpdate(questionFunction.questionOnUpdate);
 // exports.questionOnDelete = functions.firestore.document('question/{questionId}').onDelete(questionFunction.questionOnDelete);
 
-// Collection classroom
-// firebase deploy --only functions:classroomOnUpdate,functions:classroomOnDelete
-import * as classroomFunction from './function/classroom_function';
-exports.classroomOnUpdate = functions.firestore.document('classroom/{classroomId}').onUpdate(classroomFunction.classroomOnUpdate);
-exports.classroomOnDelete = functions.firestore.document('classroom/{avaliacaoId}').onDelete(classroomFunction.classroomOnDelete);
+// // Collection classroom
+// // firebase deploy --only functions:classroomOnUpdate,functions:classroomOnDelete
+// import * as classroomFunction from './function/classroom_function';
+// exports.classroomOnUpdate = functions.firestore.document('classroom/{classroomId}').onUpdate(classroomFunction.classroomOnUpdate);
+// exports.classroomOnDelete = functions.firestore.document('classroom/{avaliacaoId}').onDelete(classroomFunction.classroomOnDelete);
 
 // // Collection user
 // // firebase deploy --only functions:userOnUpdate,functions:userOnDelete
 // import * as userFunction from './function/user_function';
 // exports.userOnUpdate = functions.firestore.document('user/{userId}').onUpdate(userFunction.userOnUpdate);
 // exports.userOnDelete = functions.firestore.document('user/{avaliacaoId}').onDelete(userFunction.userOnDelete);
+
+
+// Collection situation
+// firebase deploy --only functions:situationOnUpdate,functions:situationOnDelete
+import * as situationFunction from './function/situation_function';
+exports.situationOnUpdate = functions.firestore.document('situation/{situationId}').onUpdate(situationFunction.situationOnUpdate);
+exports.situationOnDelete = functions.firestore.document('situation/{avaliacaoId}').onDelete(situationFunction.situationOnDelete);
