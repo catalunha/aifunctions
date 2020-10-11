@@ -29,22 +29,65 @@ export function classroomOnUpdate(docSnapShot: any) {
     DatabaseReferences.updateDocumentWhereEquals('question', 'classroomRef.id', docId, { 'classroomRef.name': docAfterData.name })
     DatabaseReferences.updateDocumentWhereEquals('task', 'classroomRef.id', docId, { 'classroomRef.name': docAfterData.name })
   }
-  if (docBeforeData.studentUserRefMapTemp != docAfterData.studentUserRefMapTemp) {
-    DatabaseReferences.classroom.doc(docId).set({
-      [`questionMap.${docBeforeData.name}`]: true
-    }, { merge: true }).then(() => {
-      ////console.log("OK 02")
+  if (docAfterData.studentUserRefMapTemp !== null && docBeforeData.studentUserRefMapTemp != docAfterData.studentUserRefMapTemp) {
+    // if (docAfterData.studentUserRefMapTemp!==null) {
+    for (var [key, value] of Object.entries(docAfterData.studentUserRefMapTemp)) {
+      console.log('Processando ', key);
+      userExistOrAdd(value, docId);
+    }
+    // }
+    DatabaseReferences.classroom.doc(docId).update({
+      'studentUserRefMapTemp': null
+    }).then((doc) => {
+      // console.log("OK 02")
     }).catch((err) => {
       //console.log("atualizarAplicarAplicada. exameId: " + exameId + ". Erro " + err)
-    })
+    });
+
   }
 
 
   return 0
 }
-function getNumeroAleatorio(min: any, max: any) {
-  return Math.floor(Math.random() * (max - min + 1) + min);
+
+async function userExistOrAdd(userInfo: any, classroomId: any) {
+  console.log('userExistOrAdd 1: ', userInfo, classroomId)
+  await DatabaseReferences.user.where("email", "==", userInfo.email).get().then((userSnapShot: any) => {
+
+    if (userSnapShot.docs.length > 0) {
+      let userExist = userSnapShot.docs[0];
+      console.log("userExistOrAdd 2: Atualizando apenas em user.classroomId para q ele pertença a aquela turma.")
+      DatabaseReferences.user.doc(userExist.id).set({
+        classroomId: admin.firestore.FieldValue.arrayUnion(classroomId),
+      }, { merge: true })
+      DatabaseReferences.classroom.doc(classroomId).update({
+        [`studentUserRefMap.${userExist.id}`]: {
+          id: userExist.id,
+          code: userInfo.code,
+          email: userInfo.email,
+          name: userInfo.name,
+        },
+        // [`studentUserRefMapTemp.${userInfo.id}`]: admin.firestore.FieldValue.delete()
+      }).then((doc) => {
+        // console.log("OK 02")
+      }).catch((err) => {
+        //console.log("atualizarAplicarAplicada. exameId: " + exameId + ". Erro " + err)
+      });
+
+    } else {
+      console.log("userExistOrAdd 3: Criando novo usuario");
+      DatabaseReferences.addNewUser(userInfo, classroomId);
+      //TODO: Precisa de promise. Pois ele pode apagar antes de incluir ?
+      // DatabaseReferences.onDeleteDocument('UsuarioNovo', 'email', docData.email)
+
+    }
+  }).catch((error: any) => {
+    console.log("userExistOrAdd 4: Error. " + error);
+  });
 }
+
+
+
 export function classroomOnDelete(docSnapShot: any) {
   const docId = docSnapShot.id;
   //console.log("turmaOnDelete :: " + docId);
