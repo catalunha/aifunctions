@@ -1,5 +1,6 @@
 import DatabaseReferences from "../database-references";
 // import { Timestamp } from "@google-cloud/firestore";
+let admin = require('firebase-admin');
 
 export function situationOnUpdate(situationSnapShot: any) {
     const situationBeforeData = situationSnapShot.before.data();
@@ -104,5 +105,81 @@ export function situationOnDelete(situationSnapShot: any) {
     console.log('situationOnDelete', situationId);
     DatabaseReferences.deleteDocumentGeneric('question', 'situationRef.id', situationId);
     DatabaseReferences.deleteDocumentGeneric('task', 'situationRef.id', situationId);
+    getAllDocsKnowForDeleteSituation(situationId);
     return 0;
+}
+
+async function getAllDocsKnowForDeleteSituation(situationId: any) {
+    const refDocsKnow = DatabaseReferences.db.collection('know');
+    refDocsKnow.get().then((docsKnowSnapshot) => {
+        docsKnowSnapshot.docs.forEach((doc) => {
+            console.log('Processando: ', doc.id);
+            //    tempDoc.push({ id: doc.id, ...doc.data() })
+            updateKnowForDeleteSituation(doc.id, doc.data(), situationId);
+        })
+    })
+}
+
+function updateKnowForDeleteSituation(knowId: any, knowData: any, situationId: any) {
+    console.log('updateKnow: ', 'knowId: ', knowId, 'situationId', situationId);
+    if (Object.keys(knowData.folderMap).length !== 0) {
+        Object.entries(knowData.folderMap).forEach(([keyFolderMap, valueFolderMap]: any) => {
+            // console.log(valueFolderMap.situationRefMap);
+            // console.log(Object.keys(valueFolderMap.situationRefMap).length !== 0);
+            if (Object.keys(valueFolderMap.situationRefMap).length !== 0) {
+                Object.entries(valueFolderMap.situationRefMap).forEach(([keySituationRefMap, valueSituationRefMap]: any) => {
+                    if (keySituationRefMap === situationId) {
+                        console.log(`folderMap.${keyFolderMap}.situationRefMap.${keySituationRefMap}`, 'delete()');
+                        DatabaseReferences.know.doc(knowId).update({
+                            [`folderMap.${keyFolderMap}.situationRefMap.${keySituationRefMap}`]: admin.firestore.FieldValue.delete(),
+                        });
+                    }
+                });
+            }
+        });
+    }
+    //   if (knowData.hasOwnProperty('folderMap')) {
+    //     for (let [keyFolderMap, valueFolderMap] of Object.entries(knowData.folderMap)){
+    //         console.log('keyFolderMap: ', keyFolderMap);
+    //         console.log('valueFolderMap:', valueFolderMap);
+    //         // console.log('valueFolderMap.name:', valueFolderMap.name);
+    //         // console.log('updateKnow: ', knowId, ' keyFolderMap: ', keyFolderMap);
+
+    //         // if (valueFolderMap.situationRefMap !== null) {
+    //         //     // if (valueFolderMap.hasOwnProperty('situationRefMap')) {
+    //         //     for (let [keySituationRefMap, valueSituationRefMap] of Object.entries(valueFolderMap.situationRefMap)) {
+    //         //         console.log(valueSituationRefMap);
+    //         //         if (fieldName === 'name') {
+    //         //             DatabaseReferences.know.doc(knowId).update({
+    //         //                 [`folderMap.${keyFolderMap}.situationMap.${keySituationRefMap}.name`]: fieldValue,
+    //         //             });
+    //         //         } else if (fieldName === 'url') {
+    //         //             DatabaseReferences.know.doc(knowId).update({
+    //         //                 [`folderMap.${keyFolderMap}.situationMap.${keySituationRefMap}.url`]: fieldValue,
+    //         //             });
+    //         //         }
+    //         //     }
+    //         // }
+    //     }
+    // }
+    // knowData.folderMap.forEach(([keyFolderMap, valueFolderMap]: any) => {
+    //     if (valueFolderMap.situationMap !== null) {
+    //         valueFolderMap.situationMap.forEach(([keySituationRefMap, valueSituationRefMap]: any) => {
+    //             console.log(`folderMap.${keyFolderMap}.situationMap.${keySituationRefMap}.${fieldName}`, fieldValue);
+    //             DatabaseReferences.know.doc(knowId).update({
+    //                 [`folderMap.${keyFolderMap}.situationMap.${keySituationRefMap}.${fieldName}`]: fieldValue,
+    //             });
+    //             // if (fieldName === 'name') {
+    //             //     DatabaseReferences.know.doc(knowId).update({
+    //             //         [`folderMap.${keyFolderMap}.situationMap.${keySituationRefMap}.name`]: fieldValue,
+    //             //     });
+    //             // } else if (fieldName === 'url') {
+    //             //     DatabaseReferences.know.doc(knowId).update({
+    //             //         [`folderMap.${keyFolderMap}.situationMap.${keySituationRefMap}.url`]: fieldValue,
+    //             //     });
+    //             // }
+    //         });
+    //     }
+    // });
+
 }
