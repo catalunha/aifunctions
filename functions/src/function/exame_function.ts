@@ -16,15 +16,22 @@ export function exameOnUpdate(docSnapShot: any) {
     //console.log("Avaliacao.Inicio alterado?. " + (docBeforeData.inicio as Timestamp).toDate().toLocaleString() + "!=" + (docAfterData.inicio as Timestamp).toDate().toLocaleString() + " .Atualizando em: Questao | Tarefa.")
     DatabaseReferences.updateDocumentWhereEquals('question', 'exameRef.id', docId, { 'start': docAfterData.start });
     DatabaseReferences.updateDocumentWhereEquals('task', 'exameRef.id', docId, { 'start': docAfterData.start });
+    DatabaseReferences.updateDocumentWhereEquals('task', 'exameRef.id', docId, { 'started': null });
+    DatabaseReferences.updateDocumentWhereEquals('task', 'exameRef.id', docId, { 'lastSendAnswer': null });
+    DatabaseReferences.updateDocumentWhereEquals('task', 'exameRef.id', docId, { 'attempted': 0 });
   }
   if ((docBeforeData.end as Timestamp).toDate().toLocaleString() != (docAfterData.end as Timestamp).toDate().toLocaleString()) {
     //console.log("Avaliacao.fim alterado. " + (docBeforeData.fim as Timestamp).toDate().toLocaleString() + "!=" + (docAfterData.fim as Timestamp).toDate().toLocaleString() + " .Atualizando em: Questao | Tarefa.")
     DatabaseReferences.updateDocumentWhereEquals('question', 'exameRef.id', docId, { 'end': docAfterData.end });
     DatabaseReferences.updateDocumentWhereEquals('task', 'exameRef.id', docId, { 'end': docAfterData.end });
+    DatabaseReferences.updateDocumentWhereEquals('task', 'exameRef.id', docId, { 'started': null });
+    DatabaseReferences.updateDocumentWhereEquals('task', 'exameRef.id', docId, { 'lastSendAnswer': null });
+    DatabaseReferences.updateDocumentWhereEquals('task', 'exameRef.id', docId, { 'attempted': 0 });
   }
   if (docBeforeData.scoreExame != docAfterData.scoreExame) {
     //console.log("Avaliacao.nota alterado. " + docBeforeData.nota + "!=" + docAfterData.nota + " .Atualizando em: Tarefa.");
     DatabaseReferences.updateDocumentWhereEquals('task', 'exameRef.id', docId, { 'scoreExame': docAfterData.scoreExame });
+
   }
   if (docBeforeData.isDelivered == false && docAfterData.isDelivered == true) {
     console.log("Avaliacao.aplicar false->true. Aplicando avaliação");

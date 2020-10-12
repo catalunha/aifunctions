@@ -57,15 +57,17 @@ import * as functions from 'firebase-functions';
 
 // AI com AsyncRedux e em ingles
 
-// // // Collection exame
-// import * as exameFunction from './function/exame_function';
-// exports.exameOnUpdate = functions.firestore.document('exame/{exameId}').onUpdate(exameFunction.exameOnUpdate);
-// exports.exameOnDelete = functions.firestore.document('exame/{exameId}').onDelete(exameFunction.exameOnDelete);
+// // Collection exame
+// ffirebase deploy --only functions:exameOnUpdate,functions:exameOnDelete
+import * as exameFunction from './function/exame_function';
+exports.exameOnUpdate = functions.firestore.document('exame/{exameId}').onUpdate(exameFunction.exameOnUpdate);
+exports.exameOnDelete = functions.firestore.document('exame/{exameId}').onDelete(exameFunction.exameOnDelete);
 
-// // Collection question
-// import * as questionFunction from './function/question_function';
-// exports.questionOnUpdate = functions.firestore.document('question/{questionId}').onUpdate(questionFunction.questionOnUpdate);
-// exports.questionOnDelete = functions.firestore.document('question/{questionId}').onDelete(questionFunction.questionOnDelete);
+// Collection question
+// firebase deploy --only functions:questionOnUpdate,functions:questionOnDelete
+import * as questionFunction from './function/question_function';
+exports.questionOnUpdate = functions.firestore.document('question/{questionId}').onUpdate(questionFunction.questionOnUpdate);
+exports.questionOnDelete = functions.firestore.document('question/{questionId}').onDelete(questionFunction.questionOnDelete);
 
 // // Collection classroom
 // // firebase deploy --only functions:classroomOnUpdate,functions:classroomOnDelete
