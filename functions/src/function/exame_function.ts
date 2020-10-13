@@ -217,7 +217,8 @@ function gerarSalvarNovoDocumentDeTarefa(questionDoc: any, studentDoc: any, exam
     situationRef: questionDoc.data().situationRef,
     studentUserRef: {
       id: studentDoc.id,
-      name: studentDoc.data().name
+      name: studentDoc.data().name,
+      // email: studentDoc.data().email
       // foto: studentDoc.data().foto.url != null ? studentDoc.data().foto.url : null,
     },
     //dados do exame. mas pode ser alterado pela questao por isto pego da questao

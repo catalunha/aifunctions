@@ -151,7 +151,7 @@ export default class DatabaseReferences {
       console.log("addNewUser 2: Usuario criado com sucesso. id: ", newUser.uid);
 
       DatabaseReferences.user.doc(newUser.uid).set({
-        code: userInfo.code,
+        // code: userInfo.code,
         email: userInfo.email,
         name: userInfo.name,
         isActive: true,
