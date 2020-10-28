@@ -201,7 +201,10 @@ function gerarSalvarNovoDocumentDeTarefa(questionDoc: any, studentDoc: any, exam
   console.log('situationDoc.data().name: ', situationDoc.data().name);
   let simulationIdList = Object.keys(situationDoc.data().simulationModel)
   let numberRandom = getNumeroAleatorio(0, simulationIdList.length - 1);
-  let input = situationDoc.data().simulationModel[simulationIdList[numberRandom]].input;
+  let input={};
+  if (situationDoc.data().simulationModel[simulationIdList[numberRandom]].hasOwnProperty('input')) {
+    input = situationDoc.data().simulationModel[simulationIdList[numberRandom]].input;
+  }
   let output = situationDoc.data().simulationModel[simulationIdList[numberRandom]].output;
   console.log('input: ', input);
   console.log('output: ', output);
