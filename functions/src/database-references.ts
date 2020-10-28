@@ -142,15 +142,8 @@ export default class DatabaseReferences {
   public static addNewUser(userInfo: any, classroomId: any) {
     console.log('addNewUser 1: ', userInfo, classroomId);
 
-    admin.auth().createUser({
-      email: userInfo.email,
-      password: "aialuno",
-      emailVerified: false,
-    }).then(function (newUser: any) {
-
-      console.log("addNewUser 2: Usuario criado com sucesso. id: ", newUser.uid);
-
-      DatabaseReferences.user.doc(newUser.uid).set({
+    admin.auth().getUserByEmail(userInfo.email).then(user => {
+      DatabaseReferences.user.doc(user.uid).set({
         // code: userInfo.code,
         email: userInfo.email,
         name: userInfo.name,
@@ -159,26 +152,47 @@ export default class DatabaseReferences {
         classroomId: [classroomId],
       }).then(function () {
         DatabaseReferences.classroom.doc(classroomId).update({
-          [`studentUserRefMap.${newUser.uid}`]: {
-            id: newUser.uid,
+          [`studentUserRefMap.${user.uid}`]: {
+            id: user.uid,
             code: userInfo.code,
             email: userInfo.email,
             name: userInfo.name,
           },
-          // [`studentUserRefMapTemp.${userInfo.id}`]: admin.firestore.FieldValue.delete()
-        }).then((doc) => {
-          // console.log("OK 02")
-        }).catch((err) => {
-          //console.log("atualizarAplicarAplicada. exameId: " + exameId + ". Erro " + err)
         });
-      }).catch(function (error: any) {
-        console.log("addNewUser. Em atualizar classroom in studentUserRefMap:", error);
       });
+    }).catch(error => {
+      if (error.code === 'auth/user-not-found') {
+        admin.auth().createUser({
+          email: userInfo.email,
+          password: "aialuno",
+          emailVerified: false,
+        }).then(function (newUser: any) {
 
-    }).catch(function (error: any) {
-      console.log("addNewUser. Error creating new user:", error);
+          console.log("addNewUser 2: Usuario criado com sucesso. id: ", newUser.uid);
+
+          DatabaseReferences.user.doc(newUser.uid).set({
+            // code: userInfo.code,
+            email: userInfo.email,
+            name: userInfo.name,
+            isActive: true,
+            isTeacher: false,
+            classroomId: [classroomId],
+          }).then(function () {
+            DatabaseReferences.classroom.doc(classroomId).update({
+              [`studentUserRefMap.${newUser.uid}`]: {
+                id: newUser.uid,
+                code: userInfo.code,
+                email: userInfo.email,
+                name: userInfo.name,
+              },
+            });
+          });
+
+        }).catch(function (error: any) {
+          console.log("addNewUser. Error creating new user:", error);
+        });
+      }
     });
+
   }
-
-
 }

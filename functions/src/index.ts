@@ -71,9 +71,9 @@ exports.questionOnDelete = functions.firestore.document('question/{questionId}')
 
 // // Collection classroom
 // // firebase deploy --only functions:classroomOnUpdate,functions:classroomOnDelete
-// import * as classroomFunction from './function/classroom_function';
-// exports.classroomOnUpdate = functions.firestore.document('classroom/{classroomId}').onUpdate(classroomFunction.classroomOnUpdate);
-// exports.classroomOnDelete = functions.firestore.document('classroom/{avaliacaoId}').onDelete(classroomFunction.classroomOnDelete);
+import * as classroomFunction from './function/classroom_function';
+exports.classroomOnUpdate = functions.firestore.document('classroom/{classroomId}').onUpdate(classroomFunction.classroomOnUpdate);
+exports.classroomOnDelete = functions.firestore.document('classroom/{avaliacaoId}').onDelete(classroomFunction.classroomOnDelete);
 
 // // Collection user
 // // firebase deploy --only functions:userOnUpdate,functions:userOnDelete
