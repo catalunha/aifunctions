@@ -15,43 +15,36 @@ export function questionOnUpdate(questionSnapShot: any) {
   if ((questionDocBeforeData.start as Timestamp).toDate().toLocaleString() != (questionDocAfterData.start as Timestamp).toDate().toLocaleString()) {
     //console.log("Questao.start alterado. Atualizando em: task.")
     DatabaseReferences.updateDocumentWhereEquals('task', 'questionRef.id', questionDocId, { 'start': questionDocAfterData.start });
-    DatabaseReferences.updateDocumentWhereEquals('task', 'questionRef.id', questionDocId, { 'started': null });
-    DatabaseReferences.updateDocumentWhereEquals('task', 'questionRef.id', questionDocId, { 'lastSendAnswer': null });
-    DatabaseReferences.updateDocumentWhereEquals('task', 'questionRef.id', questionDocId, { 'attempted': 0 });
   }
   if ((questionDocBeforeData.end as Timestamp).toDate().toLocaleString() != (questionDocAfterData.end as Timestamp).toDate().toLocaleString()) {
     //console.log("Questao.end alterado. Atualizando em: task.")
     DatabaseReferences.updateDocumentWhereEquals('task', 'questionRef.id', questionDocId, { 'end': questionDocAfterData.end });
-    DatabaseReferences.updateDocumentWhereEquals('task', 'questionRef.id', questionDocId, { 'started': null });
-    DatabaseReferences.updateDocumentWhereEquals('task', 'questionRef.id', questionDocId, { 'lastSendAnswer': null });
-    DatabaseReferences.updateDocumentWhereEquals('task', 'questionRef.id', questionDocId, { 'attempted': 0 });
   }
   if (questionDocBeforeData.time != questionDocAfterData.time) {
     //console.log("Questao.time alterado. Atualizando em: task.")
     DatabaseReferences.updateDocumentWhereEquals('task', 'questionRef.id', questionDocId, { 'time': questionDocAfterData.time });
-    DatabaseReferences.updateDocumentWhereEquals('task', 'questionRef.id', questionDocId, { 'started': null });
-    DatabaseReferences.updateDocumentWhereEquals('task', 'questionRef.id', questionDocId, { 'lastSendAnswer': null });
-    DatabaseReferences.updateDocumentWhereEquals('task', 'questionRef.id', questionDocId, { 'attempted': 0 });
   }
   if (questionDocBeforeData.attempt != questionDocAfterData.attempt) {
     //console.log("Questao.attempt alterado. Atualizando em: task.")
     DatabaseReferences.updateDocumentWhereEquals('task', 'questionRef.id', questionDocId, { 'attempt': questionDocAfterData.attempt });
-    DatabaseReferences.updateDocumentWhereEquals('task', 'questionRef.id', questionDocId, { 'started': null });
-    DatabaseReferences.updateDocumentWhereEquals('task', 'questionRef.id', questionDocId, { 'lastSendAnswer': null });
-    DatabaseReferences.updateDocumentWhereEquals('task', 'questionRef.id', questionDocId, { 'attempted': 0 });
   }
   if (questionDocBeforeData.error != questionDocAfterData.error) {
     //console.log("Questao.error alterado. Atualizando em: task.")
     DatabaseReferences.updateDocumentWhereEquals('task', 'questionRef.id', questionDocId, { 'error': questionDocAfterData.error });
-    DatabaseReferences.updateDocumentWhereEquals('task', 'questionRef.id', questionDocId, { 'started': null });
-    DatabaseReferences.updateDocumentWhereEquals('task', 'questionRef.id', questionDocId, { 'lastSendAnswer': null });
-    DatabaseReferences.updateDocumentWhereEquals('task', 'questionRef.id', questionDocId, { 'attempted': 0 });
   }
   if (questionDocBeforeData.scoreQuestion != questionDocAfterData.scoreQuestion) {
     //console.log("Questao.scoreQuestion alterado. Atualizando em: task.")
     DatabaseReferences.updateDocumentWhereEquals('task', 'questionRef.id', questionDocId, { 'scoreQuestion': questionDocAfterData.scoreQuestion });
   }
-
+  if (questionDocAfterData.resetTask) {
+    //console.log("Questao.scoreQuestion alterado. Atualizando em: task.")
+    DatabaseReferences.updateDocumentWhereEquals('task', 'questionRef.id', questionDocId, { 'attempted': 0 });
+    DatabaseReferences.updateDocumentWhereEquals('task', 'questionRef.id', questionDocId, { 'started': null });
+    DatabaseReferences.updateDocumentWhereEquals('task', 'questionRef.id', questionDocId, { 'lastSendAnswer': null });
+    DatabaseReferences.updateDocumentWhereEquals('task', 'questionRef.id', questionDocId, { 'isOpen': true });
+    DatabaseReferences.updateDocumentById('question', questionDocId, { resetTask: false });
+    
+  }
   return 0
 }
 

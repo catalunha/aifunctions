@@ -107,9 +107,9 @@ async function ExameApply(exameSnapShot: any) {
     // questaoAppTrue=[a,b]   studentAppTrue=[1,2]
     // questaoNewFalse=[c,d]   studentListNewFalse=[3,4]
     console.log("Process exame. CASO 04")
-    console.log("Process exame. CASO 04a - (questaoNewFalse->studentAppTrue)")
+    // console.log("Process exame. CASO 04a - (questaoNewFalse->studentAppTrue)")
     iniciarProcessoAplicarAvaliacao(questionListNew, studentListApply, exameId, exameData);
-    console.log("Process exame. CASO 04b - (questaoNewFalse->studentListNewFalse)")
+    // console.log("Process exame. CASO 04b - (questaoNewFalse->studentListNewFalse)")
     iniciarProcessoAplicarAvaliacao(questionListNew, studentListNew, exameId, exameData);
     // console.log("Aplicando avaliacao. CASO 04c - (questaoAppTrue->studentListNewFalse)")
     iniciarProcessoAplicarAvaliacao(questionListApply, studentListNew, exameId, exameData);
@@ -142,8 +142,14 @@ async function iniciarProcessoAplicarAvaliacao(questionIdList: any, studentIdLis
         //console.log(msg);
       });
       //TODOCriar function que passando lista de alunos e lista de questionario adicione-os a lista de aplicados
-    }).catch(err => { return 0 })
-  }).catch(err => { return 0 })
+    }).catch((error) => {
+      console.log("Erro getListaDocuments user. Erro ", error);
+      return 0;
+    })
+  }).catch((error) => {
+    console.log("Erro getListaDocuments question. Erro ", error);
+    return 0;
+  })
 
 }
 
@@ -155,17 +161,21 @@ async function iniciarProcessoAplicarAvaliacao(questionIdList: any, studentIdLis
  * @param exameId 
  */
 function aplicarListaQuestoesEmListaAlunos(questionDocList: any, studentDocList: any, exameId: any, exameData: any) {
-  console.log('aplicarListaQuestoesEmListaAlunos::questionDocList.id: ', questionDocList.length);
-  console.log('aplicarListaQuestoesEmListaAlunos::studentDocList.length: ', studentDocList.length);
+  // console.log('aplicarListaQuestoesEmListaAlunos::questionDocList.id: ', questionDocList.length);
+  // console.log('aplicarListaQuestoesEmListaAlunos::studentDocList.length: ', studentDocList.length);
   return new Promise((resolve, reject) => {
     questionDocList.forEach(async (questionDoc: any, index: any, array: any) => {
       await DatabaseReferences.situation.doc(questionDoc.data().situationRef.id).get().then(async (situationDoc) => {
-        console.log('aplicarListaQuestoesEmListaAlunos::questionDoc.id: ', questionDoc.id);
+        // console.log('aplicarListaQuestoesEmListaAlunos::questionDoc.id: ', questionDoc.id);
         await aplicarTarefaParaCadaAluno(questionDoc, studentDocList, exameId, exameData, situationDoc).then(() => {
           // Atualizar campo aplicar, aplicado na avaliacao
           atualizarAplicarAplicada(exameId);
-        });
-      })
+        }).catch((error)=>{
+          console.log("Erro aplicarListaQuestoesEmListaAlunos->DatabaseReferences.situation.",error);
+        });;
+      }).catch((error)=>{
+        console.log("Erro aplicarListaQuestoesEmListaAlunos->DatabaseReferences.situation.",error);
+      });
       if ((index + 1) >= array.length) {
         resolve("Fim da aplicacao de tarefas");
       }
@@ -174,12 +184,12 @@ function aplicarListaQuestoesEmListaAlunos(questionDocList: any, studentDocList:
 }
 
 function aplicarTarefaParaCadaAluno(questionDoc: any, studentDocList: any, exameId: any, exameData: any, situationDoc: any) {
-  console.log('aplicarTarefaParaCadaAluno::questionDoc.id: ', questionDoc.id);
-  console.log('aplicarTarefaParaCadaAluno::studentDocList.length: ', studentDocList.length);
+  // console.log('aplicarTarefaParaCadaAluno::questionDoc.id: ', questionDoc.id);
+  // console.log('aplicarTarefaParaCadaAluno::studentDocList.length: ', studentDocList.length);
 
   return new Promise((resolve, reject) => {
     studentDocList.forEach((studentDoc: any, index: any, array: any) => {
-      console.log('aplicarTarefaParaCadaAluno::studentDoc.id: ', studentDoc.id);
+      // console.log('aplicarTarefaParaCadaAluno::studentDoc.id: ', studentDoc.id);
       gerarSalvarNovoDocumentDeTarefa(questionDoc, studentDoc, exameId, exameData, situationDoc)
       if ((index + 1) >= array.length) {
         resolve("Fim de percorrer lista de alunos");
@@ -190,24 +200,24 @@ function aplicarTarefaParaCadaAluno(questionDoc: any, studentDocList: any, exame
 }
 
 function gerarSalvarNovoDocumentDeTarefa(questionDoc: any, studentDoc: any, exameId: any, exameData: any, situationDoc: any) {
-  console.log('>>> gerarSalvarNovoDocumentDeTarefa');
-  console.log('questionDoc.id: ', questionDoc.id);
-  console.log('questionDoc.data().name: ', questionDoc.data().name);
-  console.log('studentDoc.id: ', studentDoc.id);
-  console.log('studentDoc.data().name: ', studentDoc.data().name);
-  console.log('exameId: ', exameId);
-  console.log('exameData.name: ', exameData.name);
-  console.log('situationDoc.id: ', situationDoc.id);
-  console.log('situationDoc.data().name: ', situationDoc.data().name);
+  // console.log('>>> gerarSalvarNovoDocumentDeTarefa');
+  // console.log('questionDoc.id: ', questionDoc.id);
+  // console.log('questionDoc.data().name: ', questionDoc.data().name);
+  // console.log('studentDoc.id: ', studentDoc.id);
+  // console.log('studentDoc.data().name: ', studentDoc.data().name);
+  // console.log('exameId: ', exameId);
+  // console.log('exameData.name: ', exameData.name);
+  // console.log('situationDoc.id: ', situationDoc.id);
+  // console.log('situationDoc.data().name: ', situationDoc.data().name);
   let simulationIdList = Object.keys(situationDoc.data().simulationModel)
   let numberRandom = getNumeroAleatorio(0, simulationIdList.length - 1);
-  let input={};
+  let input = {};
   if (situationDoc.data().simulationModel[simulationIdList[numberRandom]].hasOwnProperty('input')) {
     input = situationDoc.data().simulationModel[simulationIdList[numberRandom]].input;
   }
   let output = situationDoc.data().simulationModel[simulationIdList[numberRandom]].output;
-  console.log('input: ', input);
-  console.log('output: ', output);
+  // console.log('input: ', input);
+  // console.log('output: ', output);
 
   let task = {
     teacherUserRef: exameData.userRef,
@@ -240,12 +250,14 @@ function gerarSalvarNovoDocumentDeTarefa(questionDoc: any, studentDoc: any, exam
     simulationInput: input,
     simulationOutput: output,
   }
-  console.log('task: ', task);
+  // console.log('task: ', task);
 
   DatabaseReferences.task.doc().set(task).then(() => {
     atualizarQuestaoAplicada(questionDoc.id);
     atualizarQuestionStudentApply(exameId, questionDoc.id, studentDoc.id);
-  }).catch((Err) => {
+  }).catch((error) => {
+    console.log("Erro gerarSalvarNovoDocumentDeTarefa. questionDoc.id: ", questionDoc.id, "studentDoc.id: ", studentDoc.id, ". Erro ", error);
+
   })
 }
 
@@ -253,9 +265,9 @@ function atualizarQuestaoAplicada(questionDocId: any) {
   DatabaseReferences.question.doc(questionDocId).set({
     isDelivered: true
   }, { merge: true }).then(() => {
-    ////console.log("OK 02")
+    // console.log("OK 02")
   }).catch((err) => {
-    //console.log("atualizarQuestaoAplicada. questaoID: " + questaoID + ". Erro " + err)
+    console.log("Erro atualizarQuestaoAplicada. questionDocId: ", questionDocId, ". Erro ", err);
   })
 }
 
@@ -266,7 +278,7 @@ function atualizarAplicarAplicada(exameId: any) {
   }, { merge: true }).then(() => {
     ////console.log("OK 02")
   }).catch((err) => {
-    //console.log("atualizarAplicarAplicada. exameId: " + exameId + ". Erro " + err)
+    console.log("Erro atualizarAplicarAplicada. exameId: ", exameId, ". Erro ", err)
   })
 }
 
@@ -281,7 +293,7 @@ function atualizarQuestionStudentApply(exameId: any, questionId: any, studentId:
   }).then(() => {
     //console.log("Avaliacao: " + exameId + " Lista de usuarios atualizada")
   }).catch((err) => {
-    //console.log("Err 02 " + err)
+    console.log("Erro atualizarQuestionStudentApply. exameId: ", exameId, "questionId: ", questionId, "studentId: ", studentId, ". Erro ", err);
   })
 }
 
@@ -319,7 +331,7 @@ function getListaDocuments(listaIdsDocumentos: any, collection: any) {
       await DatabaseReferences.db.collection(collection).doc(idDoc).get().then((document) => {
         listaResultado.push(document);
       }).catch((err) => {
-        //console.log("getListaDocuments. Erro. Col.: " + collection + " Id: " + idDoc);
+        console.log("getListaDocuments. Erro. Col.: " + collection + " Id: " + idDoc);
         reject("");
       })
       if ((index) + 1 >= array.length) {
