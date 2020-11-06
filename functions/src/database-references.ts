@@ -1,7 +1,13 @@
-import * as admin from 'firebase-admin';
+import admin = require('firebase-admin');
+import functions = require('firebase-functions');
 
-admin.initializeApp();
-const databaseReferences = admin.firestore();
+admin.initializeApp(functions.config().firebase);
+
+let databaseReferences = admin.firestore();
+// import * as admin from 'firebase-admin';
+
+// admin.initializeApp();
+// const databaseReferences = admin.firestore();
 
 export default class DatabaseReferences {
   //referencia geral
