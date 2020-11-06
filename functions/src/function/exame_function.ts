@@ -51,16 +51,15 @@ export function exameOnDelete(docSnapShot: any) {
 
 
 
-// let batch = DatabaseReferences.db.batch();
 async function ExameApply(exameSnapShot: any) {
-  console.log("ExameApply: ");
-  // let exameDataAntes = exameSnapShot.before.data();
   let exameData = exameSnapShot.after.data();
   let exameId = exameSnapShot.after.id;
+  console.log("ExameApply exameId: " + exameId);
+  atualizarAplicarAplicada(exameId);
+
   //+++ apagar
   //verificar se a condicao isDelivered esta true
   if (!exameData.isDelivered) { return 0; }
-  console.log("Process exameRef.id: " + exameId);
 
   let questionListApply: Array<string> = [];
   let questionListNew: Array<string> = [];
@@ -116,7 +115,7 @@ async function ExameApply(exameSnapShot: any) {
     return 0;
   } else {
     // console.log("Aplicando avaliacao. Nenhuma condicao foi atingida");
-    atualizarAplicarAplicada(exameId);
+    // atualizarAplicarAplicada(exameId);
     return 0;
   }
 }
@@ -134,16 +133,19 @@ async function iniciarProcessoAplicarAvaliacao(questionIdList: any, studentIdLis
   console.log("iniciarProcessoAplicarAvaliacao. questionIdList.length = " + questionIdList.length)
   console.log("iniciarProcessoAplicarAvaliacao. studentIdList.length = " + studentIdList.length)
   console.log("iniciarProcessoAplicarAvaliacao. exameId = " + exameId)
+
   //pegar lista de documents de questoes
-  await getListaDocuments(questionIdList, 'question').then(async (questionDocList:any) => {
+  await getListaDocuments(questionIdList, 'question').then(async (questionDocList: any) => {
     console.log('iniciarProcessoAplicarAvaliacao::questionDocList.length: ', questionDocList.length);
 
     //pegar a lista de documents de alunos
-    await getListaDocuments(studentIdList, 'user').then(async (studentDocList:any) => {
+    await getListaDocuments(studentIdList, 'user').then(async (studentDocList: any) => {
       console.log('iniciarProcessoAplicarAvaliacao::studentDocList.length: ', studentDocList.length);
       //aplicar questao para cada aluno
       await aplicarListaQuestoesEmListaAlunos(questionDocList, studentDocList, exameId, exameData).then((msg) => {
-        //console.log(msg);
+        console.log(msg);
+
+
       });
       //TODOCriar function que passando lista de alunos e lista de questionario adicione-os a lista de aplicados
     }).catch((error) => {
@@ -168,13 +170,14 @@ async function iniciarProcessoAplicarAvaliacao(questionIdList: any, studentIdLis
 function aplicarListaQuestoesEmListaAlunos(questionDocList: any, studentDocList: any, exameId: any, exameData: any) {
   console.log('aplicarListaQuestoesEmListaAlunos::questionDocList.length: ', questionDocList.length);
   console.log('aplicarListaQuestoesEmListaAlunos::studentDocList.length: ', studentDocList.length);
+
   return new Promise((resolve, reject) => {
     questionDocList.forEach(async (questionDoc: any, index: any, array: any) => {
       await DatabaseReferences.situation.doc(questionDoc.data().situationRef.id).get().then(async (situationDoc) => {
         // console.log('aplicarListaQuestoesEmListaAlunos::questionDoc.id: ', questionDoc.id);
-        await aplicarTarefaParaCadaAluno(questionDoc, studentDocList, exameId, exameData, situationDoc).then(() => {
+        await aplicarQuestaoParaCadaAluno(questionDoc, studentDocList, exameId, exameData, situationDoc).then(() => {
           // Atualizar campo aplicar, aplicado na avaliacao
-          atualizarAplicarAplicada(exameId);
+          // atualizarAplicarAplicada(exameId);
         }).catch((error) => {
           console.log("Erro aplicarListaQuestoesEmListaAlunos->DatabaseReferences.situation.", error);
         });;
@@ -182,51 +185,28 @@ function aplicarListaQuestoesEmListaAlunos(questionDocList: any, studentDocList:
         console.log("Erro aplicarListaQuestoesEmListaAlunos->DatabaseReferences.situation.", error);
       });
       if ((index + 1) >= array.length) {
-        // console.log("Listadas todas as questões");
-        // // Commit the batch
-        // batch.commit().then(function () {
-        //   console.log("batch.commit");
-        // });
-        resolve("Fim da aplicacao de tarefas");
+        resolve("Fim da aplicacao de tarefas todas as questões para todos os alunos");
       }
     });
   })
 }
 
-function aplicarTarefaParaCadaAluno(questionDoc: any, studentDocList: any, exameId: any, exameData: any, situationDoc: any) {
-  console.log('aplicarTarefaParaCadaAluno::questionDoc.id: ', questionDoc.id);
-  console.log('aplicarTarefaParaCadaAluno::studentDocList.length: ', studentDocList.length);
+function aplicarQuestaoParaCadaAluno(questionDoc: any, studentDocList: any, exameId: any, exameData: any, situationDoc: any) {
+  console.log('aplicarQuestaoParaCadaAluno::questionDoc.id: ', questionDoc.id);
+  console.log('aplicarQuestaoParaCadaAluno::studentDocList.length: ', studentDocList.length);
+
 
   return new Promise((resolve, reject) => {
     // let taskList: any[] = [];
     // let atualizarQuestaoList: any[] = [];
     // let atualizarQuestionStudentApplyList: any[] = [];
+    let questionApplyList = new Set();
+    let studentApplyList = new Set();
+    let batch = DatabaseReferences.db.batch();
     studentDocList.forEach(async (studentDoc: any, index: any, array: any) => {
-      console.log('aplicarTarefaParaCadaAluno::studentDoc.id: ', studentDoc.id);
-      gerarSalvarNovoDocumentDeTarefa(questionDoc, studentDoc, exameId, exameData, situationDoc);
-      // atualizarQuestaoAplicada(questionDoc.id);
-      // atualizarQuestionStudentApply(exameId, questionDoc.id, studentDoc.id);
-      // taskList.push(gerarSalvarNovoDocumentDeTarefa(questionDoc, studentDoc, exameId, exameData, situationDoc));
-      // atualizarQuestaoList.push(atualizarQuestaoAplicada(questionDoc.id));
-      // atualizarQuestionStudentApplyList.push(atualizarQuestionStudentApply(exameId, questionDoc.id, studentDoc.id));
-      if ((index + 1) >= array.length) {
-        console.log('processando as promessas...');
-        // await Promise.all(taskList);
-        // await Promise.all(atualizarQuestaoList);
-        // await Promise.all(atualizarQuestionStudentApplyList);
-        resolve("Fim de percorrer lista de alunos");
-      }
-    });
-  })
-
-}
-
-async function gerarSalvarNovoDocumentDeTarefa(questionDoc: any, studentDoc: any, exameId: any, exameData: any, situationDoc: any) {
-  // console.log('gerarSalvarNovoDocumentDeTarefa questionDoc.id: ', questionDoc.id);
-  // console.log('gerarSalvarNovoDocumentDeTarefa studentDoc.id: ', studentDoc.id);
-  // console.log('gerarSalvarNovoDocumentDeTarefa exameId: ', exameId);
-  // console.log('gerarSalvarNovoDocumentDeTarefa situationDoc.id: ', situationDoc.id);
-  let simulationIdList = Object.keys(situationDoc.data().simulationModel)
+      // console.log('aplicarQuestaoParaCadaAluno::studentDoc.id: ', studentDoc.id);
+      // gerarSalvarNovoDocumentDeTarefa(questionDoc, studentDoc, exameId, exameData, situationDoc, batch, questionApplyList, studentApplyList);
+      let simulationIdList = Object.keys(situationDoc.data().simulationModel)
   let numberRandom = getNumeroAleatorio(0, simulationIdList.length - 1);
   let input = {};
   if (situationDoc.data().simulationModel[simulationIdList[numberRandom]].hasOwnProperty('input')) {
@@ -263,22 +243,103 @@ async function gerarSalvarNovoDocumentDeTarefa(questionDoc: any, studentDoc: any
     // gestão da questao
     attempted: 0,
     isOpen: true,
-
     simulationInput: input,
     simulationOutput: output,
   }
+  questionApplyList.add(questionDoc.id);
+  studentApplyList.add(studentDoc.id);
+  // atualizarQuestaoAplicada(questionDoc.id);
+  batch.set(DatabaseReferences.task.doc(), task);
+      // atualizarQuestionStudentApply(exameId, questionDoc.id, studentDoc.id);
+      // taskList.push(gerarSalvarNovoDocumentDeTarefa(questionDoc, studentDoc, exameId, exameData, situationDoc));
+      // atualizarQuestaoList.push(atualizarQuestaoAplicada(questionDoc.id));
+      // atualizarQuestionStudentApplyList.push(atualizarQuestionStudentApply(exameId, questionDoc.id, studentDoc.id));
+      if ((index + 1) >= array.length) {
+        console.log('aplicarQuestaoParaCadaAluno fim');
+        // Commit the batch
+        batch.commit().then(function () {
+          console.log("batch.commit");
+        });
+        atualizarQuestionStudentApplyList(exameId, questionApplyList, studentApplyList);
+        atualizarQuestaoAplicada(questionDoc.id);
 
-  // console.log('task: ', task);
-  // batch.set(DatabaseReferences.task.doc(), task);
-  DatabaseReferences.task.add(task)
-    .then((doc) => {
-      console.log("gerarSalvarNovoDocumentDeTarefa new task", doc.id);
-      atualizarQuestaoAplicada(questionDoc.id);
-      atualizarQuestionStudentApply(exameId, questionDoc.id, studentDoc.id);
-    }).catch((error) => {
-      console.log("Erro gerarSalvarNovoDocumentDeTarefa. questionDoc.id: ", questionDoc.id, "studentDoc.id: ", studentDoc.id, ". Erro ", error);
+        // await Promise.all(taskList);
+        // await Promise.all(atualizarQuestaoList);
+        // await Promise.all(atualizarQuestionStudentApplyList);
+        resolve("Fim de percorrer lista de alunos");
+      }
     });
+  })
+
 }
+
+// async function gerarSalvarNovoDocumentDeTarefa(questionDoc: any, studentDoc: any, exameId: any, exameData: any, situationDoc: any, batch: any, questionApplyList: any, studentApplyList: any) {
+//   // console.log('gerarSalvarNovoDocumentDeTarefa questionDoc.id: ', questionDoc.id);
+//   // console.log('gerarSalvarNovoDocumentDeTarefa studentDoc.id: ', studentDoc.id);
+//   // console.log('gerarSalvarNovoDocumentDeTarefa exameId: ', exameId);
+//   // console.log('gerarSalvarNovoDocumentDeTarefa situationDoc.id: ', situationDoc.id);
+//   let simulationIdList = Object.keys(situationDoc.data().simulationModel)
+//   let numberRandom = getNumeroAleatorio(0, simulationIdList.length - 1);
+//   let input = {};
+//   if (situationDoc.data().simulationModel[simulationIdList[numberRandom]].hasOwnProperty('input')) {
+//     input = situationDoc.data().simulationModel[simulationIdList[numberRandom]].input;
+//   }
+//   let output = situationDoc.data().simulationModel[simulationIdList[numberRandom]].output;
+//   // console.log('input: ', input);
+//   // console.log('output: ', output);
+
+//   let task = {
+//     teacherUserRef: exameData.userRef,
+//     classroomRef: questionDoc.data().classroomRef,
+//     exameRef: questionDoc.data().exameRef,
+//     questionRef: {
+//       id: questionDoc.id,
+//       name: questionDoc.data().name
+//     },
+//     situationRef: questionDoc.data().situationRef,
+//     studentUserRef: {
+//       id: studentDoc.id,
+//       name: studentDoc.data().name,
+//       // email: studentDoc.data().email
+//       // foto: studentDoc.data().foto.url != null ? studentDoc.data().foto.url : null,
+//     },
+//     //dados do exame. mas pode ser alterado pela questao por isto pego da questao
+//     start: questionDoc.data().start,
+//     end: questionDoc.data().end,
+//     scoreExame: exameData.scoreExame,
+//     //dados da questao
+//     attempt: questionDoc.data().attempt,
+//     time: questionDoc.data().time,
+//     error: questionDoc.data().error,
+//     scoreQuestion: questionDoc.data().scoreQuestion,
+//     // gestão da questao
+//     attempted: 0,
+//     isOpen: true,
+//     simulationInput: input,
+//     simulationOutput: output,
+//   }
+
+//   // console.log('task: ', task);
+//   // batch.set(DatabaseReferences.task.doc(), task);
+//   // DatabaseReferences.task.add(task)
+//   //   .then((doc) => {
+//   //     console.log("gerarSalvarNovoDocumentDeTarefa new task", doc.id);
+//   //     atualizarQuestaoAplicada(questionDoc.id);
+//   //     // atualizarQuestionStudentApply(exameId, questionDoc.id, studentDoc.id);
+//   //     questionApplyList.add(questionDoc.id);
+//   //     studentApplyList.add(studentDoc.id);
+//   //   }).catch((error) => {
+//   //     console.log("Erro gerarSalvarNovoDocumentDeTarefa. questionDoc.id: ", questionDoc.id, "studentDoc.id: ", studentDoc.id, ". Erro ", error);
+//   //   });
+//   questionApplyList.add(questionDoc.id);
+//   studentApplyList.add(studentDoc.id);
+//   // atualizarQuestaoAplicada(questionDoc.id);
+//   batch.set(DatabaseReferences.task.doc(), task);
+//   // return task;
+//   // await batch.update(DatabaseReferences.question.doc(questionDoc.id), {
+//   //   isDelivered: true
+//   // });
+// }
 
 function atualizarQuestaoAplicada(questionDocId: any) {
   DatabaseReferences.question.doc(questionDocId).update({
@@ -292,8 +353,6 @@ function atualizarQuestaoAplicada(questionDocId: any) {
   //   isDelivered: true
   // });
   // batch.update(DatabaseReferences.task.doc(questionDocId), { isDelivered: true });
-
-
 }
 
 function atualizarAplicarAplicada(exameId: any) {
@@ -311,18 +370,50 @@ function atualizarAplicarAplicada(exameId: any) {
 
 }
 
-function atualizarQuestionStudentApply(exameId: any, questionId: any, studentId: any) {
+// function atualizarQuestionStudentApply(exameId: any, questionId: any, studentId: any) {
+//   // let field = 'studentMap.',studentId;
+//   DatabaseReferences.exame.doc(exameId).update({
+//     // field: true
+//     // 'studentMap.',studentId: true
+//     // `studentMap.${studentId}`: true
+//     [`studentMap.${studentId}`]: true,
+//     [`questionMap.${questionId}`]: true
+//   }).then(() => {
+//     //console.log("Avaliacao: " + exameId + " Lista de usuarios atualizada")
+//   }).catch((err) => {
+//     console.log("Erro atualizarQuestionStudentApply. exameId: ", exameId, "questionId: ", questionId, "studentId: ", studentId, ". Erro ", err);
+//   });
+//   // return DatabaseReferences.exame.doc(exameId).update({
+//   //   // field: true
+//   //   // 'studentMap.',studentId: true
+//   //   // `studentMap.${studentId}`: true
+//   //   [`studentMap.${studentId}`]: true,
+//   //   [`questionMap.${questionId}`]: true
+//   // })
+//   // batch.update(DatabaseReferences.task.doc(exameId), { [`studentMap.${studentId}`]: true, [`questionMap.${questionId}`]: true });
+
+// }
+
+function atualizarQuestionStudentApplyList(exameId: any, questionIdList: any, studentIdList: any) {
+  console.log('atualizarQuestionStudentApplyList');
+  let idsMap = new Map();
+  questionIdList.forEach(async (idDoc: any, index: any, array: any) => {
+    idsMap.set(`questionMap.${idDoc}`, true);
+  });
+  studentIdList.forEach(async (idDoc: any, index: any, array: any) => {
+    idsMap.set(`studentMap.${idDoc}`, true);
+  });
+  let jsonResponse: any = {};
+  for (let [key, val] of idsMap.entries()) {
+    jsonResponse[key] = val;
+  }
+  // console.log('idsMap: ',idsMap);
+  // console.log('jsonResponse: ',jsonResponse);
   // let field = 'studentMap.',studentId;
-  DatabaseReferences.exame.doc(exameId).update({
-    // field: true
-    // 'studentMap.',studentId: true
-    // `studentMap.${studentId}`: true
-    [`studentMap.${studentId}`]: true,
-    [`questionMap.${questionId}`]: true
-  }).then(() => {
+  DatabaseReferences.exame.doc(exameId).update(jsonResponse).then(() => {
     //console.log("Avaliacao: " + exameId + " Lista de usuarios atualizada")
   }).catch((err) => {
-    console.log("Erro atualizarQuestionStudentApply. exameId: ", exameId, "questionId: ", questionId, "studentId: ", studentId, ". Erro ", err);
+    console.log("Erro atualizarQuestionStudentApplyList. exameId: ", exameId, ". Erro ", err);
   });
   // return DatabaseReferences.exame.doc(exameId).update({
   //   // field: true
