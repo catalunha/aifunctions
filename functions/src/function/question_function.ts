@@ -64,12 +64,12 @@ async function questionDeliver(questionSnapShot: any) {
     let questionId = questionSnapShot.id;
     console.log("questionDeliver questionId: " + questionId);
 
-    if (question.isDelivered) {
-        setQuestionIsDelivered(questionId, true);
-    } else {
-        setQuestionIsDelivered(questionId, false);
-        return 0;
-    }
+    // if (question.isDelivered) {
+    //     setQuestionIsDelivered(questionId, true);
+    // } else {
+    //     setQuestionIsDelivered(questionId, false);
+    //     return 0;
+    // }
 
     let studentIdList: Array<string> = [];
     if (question.hasOwnProperty('studentUserRefMap')) {

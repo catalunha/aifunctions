@@ -29,24 +29,21 @@ export function classroomOnUpdate(docSnapShot: any) {
     DatabaseReferences.updateDocumentWhereEquals('question', 'classroomRef.id', docId, { 'classroomRef.name': docAfterData.name })
     DatabaseReferences.updateDocumentWhereEquals('task', 'classroomRef.id', docId, { 'classroomRef.name': docAfterData.name })
   }
-  if (docAfterData.studentUserRefMapTemp !== null && docBeforeData.studentUserRefMapTemp != docAfterData.studentUserRefMapTemp) {
-    // if (docAfterData.studentUserRefMapTemp!==null) {
-    for (var [key, value] of Object.entries(docAfterData.studentUserRefMapTemp)) {
+  if (docAfterData.studentRefTemp !== null && docBeforeData.studentRefTemp != docAfterData.studentRefTemp) {
+    // if (docAfterData.studentRefTemp!==null) {
+    for (var [key, value] of Object.entries(docAfterData.studentRefTemp)) {
       console.log('Processando ', key);
       userExistOrAdd(value, docId);
     }
     // }
     DatabaseReferences.classroom.doc(docId).update({
-      'studentUserRefMapTemp': null
+      'studentRefTemp': null
     }).then((doc) => {
       // console.log("OK 02")
     }).catch((err) => {
       //console.log("atualizarAplicarAplicada. exameId: " + exameId + ". Erro " + err)
     });
-
   }
-
-
   return 0
 }
 
@@ -61,13 +58,13 @@ async function userExistOrAdd(userInfo: any, classroomId: any) {
         classroomId: admin.firestore.FieldValue.arrayUnion(classroomId),
       }, { merge: true })
       DatabaseReferences.classroom.doc(classroomId).update({
-        [`studentUserRefMap.${userExist.id}`]: {
+        [`studentRef.${userExist.id}`]: {
           id: userExist.id,
           code: userInfo.code,
           email: userInfo.email,
           name: userInfo.name,
         },
-        // [`studentUserRefMapTemp.${userInfo.id}`]: admin.firestore.FieldValue.delete()
+        // [`studentRefTemp.${userInfo.id}`]: admin.firestore.FieldValue.delete()
       }).then((doc) => {
         // console.log("OK 02")
       }).catch((err) => {

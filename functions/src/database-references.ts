@@ -42,63 +42,63 @@ export default class DatabaseReferences {
       console.log("updateDocumentById. Error getting documents.  Col.: " + collectionName + " field: " + documentId , error);
     })
   }
-  public static updateDocumentWhereEquals(collectionName: any, fieldName: any, documentId: any, updateJsonData: any) {
-    console.log("updateDocumentWhereEquals. Entrada Col.: " + collectionName + " field: " + fieldName + ' documentId: ' + documentId + ' documentId: ' + updateJsonData);
-    this.db.collection(collectionName).where(fieldName, '==', documentId).get().then((querySnapShot: any) => {
-      console.log('updateDocumentWhereEquals', querySnapShot.docs.length);
-      const chunk = (arr: string | any[], size: number) =>
-        Array.from({ length: Math.ceil(arr.length / size) }, (_v, i) =>
-          arr.slice(i * size, i * size + size)
-        );
-      console.log(chunk(querySnapShot.docs, 250).length);
-      chunk(querySnapShot.docs, 250).forEach((docRef: any) => {
-        let batch = DatabaseReferences.db.batch();
-        docRef.forEach((docRef: any, index: any, array: any) => {
-          batch.update(this.db.collection(collectionName).doc(docRef.id), updateJsonData);
-          if ((index) + 1 >= array.length) {
-            batch.commit().then(function () {
-              batch = DatabaseReferences.db.batch();
-              console.log("updateDocumentWhereEquals index:"+index+ " batch.commit Col.: " + collectionName + " field: " + fieldName + ' documentId: ' + documentId);
-            });
-          }
-        });
- 
-      })
-      // if (querySnapShot.docs.length > 0) {
-      //   let batch = DatabaseReferences.db.batch();
-      //   querySnapShot.docs.forEach((docRef: any, index: any, array: any) => {
-      //     batch.update(this.db.collection(collectionName).doc(docRef.id), updateJsonData);
-      //     if ((index) + 1 >= array.length) {
-      //       batch.commit().then(function () {
-      //         console.log("updateDocumentWhereEquals index:"+index+ " batch.commit Col.: " + collectionName + " field: " + fieldName + ' documentId: ' + documentId);
-      //       });
-      //     }
-      //   })
-      // }
-    }).catch((error: any) => {
-      console.log('updateDocumentWhereEquals. Error getting documents.  Col.: ' + collectionName + ' fieldName: ' + fieldName + ' documentId: ' + documentId, error)
-    })
-  }
-
   // public static updateDocumentWhereEquals(collectionName: any, fieldName: any, documentId: any, updateJsonData: any) {
-  //   console.log("updateDocumentWhereEquals. Entrada Col.: " + collectionName + " field: " + fieldName + ' documentId: ' + documentId);
-
+  //   console.log("updateDocumentWhereEquals. Entrada Col.: " + collectionName + " field: " + fieldName + ' documentId: ' + documentId + ' documentId: ' + updateJsonData);
   //   this.db.collection(collectionName).where(fieldName, '==', documentId).get().then((querySnapShot: any) => {
-  //     if (querySnapShot.docs.length > 0) {
+  //     console.log('updateDocumentWhereEquals', querySnapShot.docs.length);
+  //     const chunk = (arr: string | any[], size: number) =>
+  //       Array.from({ length: Math.ceil(arr.length / size) }, (_v, i) =>
+  //         arr.slice(i * size, i * size + size)
+  //       );
+  //     console.log(chunk(querySnapShot.docs, 250).length);
+  //     chunk(querySnapShot.docs, 250).forEach((docRef: any) => {
   //       let batch = DatabaseReferences.db.batch();
-  //       querySnapShot.docs.forEach((docRef: any, index: any, array: any) => {
+  //       docRef.forEach((docRef: any, index: any, array: any) => {
   //         batch.update(this.db.collection(collectionName).doc(docRef.id), updateJsonData);
   //         if ((index) + 1 >= array.length) {
   //           batch.commit().then(function () {
+  //             batch = DatabaseReferences.db.batch();
   //             console.log("updateDocumentWhereEquals index:"+index+ " batch.commit Col.: " + collectionName + " field: " + fieldName + ' documentId: ' + documentId);
   //           });
   //         }
-  //       })
-  //     }
+  //       });
+ 
+  //     })
+  //     // if (querySnapShot.docs.length > 0) {
+  //     //   let batch = DatabaseReferences.db.batch();
+  //     //   querySnapShot.docs.forEach((docRef: any, index: any, array: any) => {
+  //     //     batch.update(this.db.collection(collectionName).doc(docRef.id), updateJsonData);
+  //     //     if ((index) + 1 >= array.length) {
+  //     //       batch.commit().then(function () {
+  //     //         console.log("updateDocumentWhereEquals index:"+index+ " batch.commit Col.: " + collectionName + " field: " + fieldName + ' documentId: ' + documentId);
+  //     //       });
+  //     //     }
+  //     //   })
+  //     // }
   //   }).catch((error: any) => {
   //     console.log('updateDocumentWhereEquals. Error getting documents.  Col.: ' + collectionName + ' fieldName: ' + fieldName + ' documentId: ' + documentId, error)
   //   })
   // }
+
+  public static updateDocumentWhereEquals(collectionName: any, fieldName: any, documentId: any, updateJsonData: any) {
+    console.log("updateDocumentWhereEquals. Entrada Col.: " + collectionName + " field: " + fieldName + ' documentId: ' + documentId);
+
+    this.db.collection(collectionName).where(fieldName, '==', documentId).get().then((querySnapShot: any) => {
+      if (querySnapShot.docs.length > 0) {
+        let batch = DatabaseReferences.db.batch();
+        querySnapShot.docs.forEach((docRef: any, index: any, array: any) => {
+          batch.update(this.db.collection(collectionName).doc(docRef.id), updateJsonData);
+          if ((index) + 1 >= array.length) {
+            batch.commit().then(function () {
+              console.log("updateDocumentWhereEquals index:"+index+ " batch.commit Col.: " + collectionName + " field: " + fieldName + ' documentId: ' + documentId);
+            });
+          }
+        })
+      }
+    }).catch((error: any) => {
+      console.log('updateDocumentWhereEquals. Error getting documents.  Col.: ' + collectionName + ' fieldName: ' + fieldName + ' documentId: ' + documentId, error)
+    })
+  }
 
   public static updateDocumentWhereArrayContains(collectionName: any, fieldName: any, documentId: any, updateJsonData: any) {
     console.log("updateDocumentWhereArrayContains. Entrada Col.: " + collectionName + " field: " + fieldName + " documentId: " + documentId );
@@ -181,7 +181,7 @@ export default class DatabaseReferences {
         classroomId: [classroomId],
       }).then(function () {
         DatabaseReferences.classroom.doc(classroomId).update({
-          [`studentUserRefMap.${user.uid}`]: {
+          [`studentRef.${user.uid}`]: {
             id: user.uid,
             code: userInfo.code,
             email: userInfo.email,
@@ -208,7 +208,7 @@ export default class DatabaseReferences {
             classroomId: [classroomId],
           }).then(function () {
             DatabaseReferences.classroom.doc(classroomId).update({
-              [`studentUserRefMap.${newUser.uid}`]: {
+              [`studentRef.${newUser.uid}`]: {
                 id: newUser.uid,
                 code: userInfo.code,
                 email: userInfo.email,
