@@ -1,0 +1,49 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "task",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "classroomRef.id",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "exameRef.id",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "studentUserRef.id",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "start",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "task",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "classroomRef.id",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "isOpen",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "studentUserRef.id",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "start",
+          "order": "ASCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

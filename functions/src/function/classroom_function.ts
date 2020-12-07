@@ -9,7 +9,7 @@ export function classroomOnUpdate(docSnapShot: any) {
   const docAfterData = docSnapShot.after.data();
   const docId = docSnapShot.after.id;
 
-  //console.log("turmaOnUpdate :: " + docId);
+  console.log("turmaOnUpdate :: " + docId);
 
   if (docBeforeData.company != docAfterData.company) {
     //console.log("Turma.Nome alterado. Atualizando em: Avaliacao | Questao | Tarefa | Encontro.")
